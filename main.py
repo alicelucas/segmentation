@@ -12,6 +12,7 @@ if __name__ == '__main__':
 
     filename = sys.argv[1]
     im = io.imread(filename, as_gray=True)
+    im = preprocessing.normalize(im) #Convert to float and range [0, 1]
 
     unet = model.unet_model()
 

@@ -1,6 +1,14 @@
 import numpy
 from skimage import color
 
+def normalize(x):
+  """
+  Array is typically read in as int and from [0, 255]. Here we convert to float and normalize to range [0, 1].
+  :param x: the array
+  :return: the normalized array
+  """
+  return x.astype(float) / 255.0
+
 def to_tensor(x):
   """
   From a (N, M) shape to a (B, N, M, C) shape

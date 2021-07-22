@@ -10,7 +10,12 @@ def unet_model():
 
     output_channels = 3
 
-    base_model = tf.keras.applications.MobileNetV2(input_shape=[128, 128, 3], include_top=False)
+    ##Download model from cloud storage
+    # base_model = tf.keras.applications.MobileNetV2(input_shape=[128, 128, 3], include_top=False)
+
+    #Instantiate model using stored weights
+    base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape=[128, 128, 3], include_top=False) #Instantiate architecture
+    base_model.load_weights("./weights/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_1.0_128_no_top.h5")
 
     # Use the activations of these layers
     layer_names = [

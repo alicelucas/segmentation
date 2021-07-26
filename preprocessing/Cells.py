@@ -29,21 +29,20 @@ class CellsSequence(keras.utils.Sequence):
 
         #Replace "inside cell labels with 2"
         cell_label = 178, 178, 178
-        pixels = (red == cell_label[0]) & (green == cell_label[1]) & (blue == cell_label[2]) #Get pixel indices that have that color
+        cell_pixels = (red == cell_label[0]) & (green == cell_label[1]) & (blue == cell_label[2]) #Get pixel indices that have that color
         #pixels is a (image_size, image_size) array with True and False values
-        y[pixels] = 2
+        y[cell_pixels] = 2
 
         #Replace background label with 0
         background_label = 0, 0, 0
-        pixels = (red == background_label[0]) & (green == background_label[1]) & (
+        background_pixels = (red == background_label[0]) & (green == background_label[1]) & (
                     blue == background_label[2])
-        y[pixels] = 0
+        y[background_pixels] = 0
 
         # Replace border label with 1
-        #FIXME this misses some of the border pixels
-        pixels = (red != background_label[0]) & (green != background_label[1]) & (
-                blue != background_label[2]) & (red != cell_label[0]) & (green != cell_label[1]) & (blue != cell_label[2])  # Get pixel indices that have that color
-        y[pixels] = 1
+        #Here making the assumption that everything that is not background or cell was labeled as border
+        border_pixels = np.logical_not(np.logical_or(background_pixels, cell_pixels))
+        y[border_pixels] = 1
 
         return y
 
@@ -64,7 +63,8 @@ class CellsSequence(keras.utils.Sequence):
         for i, path in enumerate(batch_y_paths):
             img = load_img(path, target_size=(self.image_size, self.image_size))
             data = np.array([img_to_array(img)], dtype="uint8")
-            y[i] = np.expand_dims(self.convert_labels(data[0]), 2)
+            mask = self.convert_labels(data[0])
+            y[i] = np.expand_dims(mask, 2)
 
         return x, y
 

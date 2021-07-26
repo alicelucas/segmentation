@@ -21,7 +21,6 @@ if __name__ == '__main__':
     input_size = 224
     patch_size = input_size - 2 * pad_size # account for padding
 
-
     # number of patches in row and column directions
     n_row = im.shape[1] // patch_size
     n_col = im.shape[0] // patch_size

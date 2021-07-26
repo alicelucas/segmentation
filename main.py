@@ -18,8 +18,9 @@ if __name__ == '__main__':
 
     #Code below prepares patch extraction process
     pad_size = 8
-    patch_size = 112 #(128 - 2 * 8); account for padding
-    input_size = 128
+    input_size = 224
+    patch_size = input_size - 2 * pad_size # account for padding
+
 
     # number of patches in row and column directions
     n_row = im.shape[1] // patch_size

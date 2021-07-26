@@ -14,7 +14,7 @@ def unet_model():
     # base_model = tf.keras.applications.MobileNetV2(input_shape=[128, 128, 3], include_top=False)
 
     #Instantiate model using stored weights
-    base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape=[128, 128, 3], include_top=False,
+    base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape=[224, 224, 3], include_top=False,
                                                                 weights="./weights/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_1.0_128_no_top.h5") #Instantiate architecture
 
     # Use the activations of these layers
@@ -40,7 +40,7 @@ def unet_model():
         pix2pix.upsample(64, 3),  # 32x32 -> 64x64
     ]
 
-    inputs = tf.keras.layers.Input(shape=[128, 128, 3])
+    inputs = tf.keras.layers.Input(shape=[224, 224, 3])
 
     # Downsampling through the model
     skips = down_stack(inputs)

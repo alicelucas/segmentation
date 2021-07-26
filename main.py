@@ -3,12 +3,30 @@ from models import model
 from skimage import io
 import numpy
 import sys
+from preprocessing import Cells
+from os import listdir
+from os.path import isfile, join
 
 if __name__ == '__main__':
     """
     This simple script accepts an image filename as input, patches it up in the desired patch size, and feeds
     each patch to a UNet model (with a pre-trained MobileNet backbone but random decoded)
     """
+
+    #Load preprocessing
+    batch_size = 1
+    img_size = 1024
+
+    #Get list of input files and target masks
+    image_dir = "data/maddox/images"
+    target_dir = "data/maddox/masks"
+    input_img_paths = [join(image_dir, f) for f in listdir(image_dir) if isfile(join(image_dir, f))]
+    target_paths = [join(target_dir, f) for f in listdir(target_dir) if isfile(join(target_dir, f))]
+
+
+    data = Cells.CellsSequence(input_img_paths, target_paths, batch_size, img_size)
+    x, y = data.__getitem__(15)
+
 
     filename = sys.argv[1]
     im = io.imread(filename, as_gray=True)

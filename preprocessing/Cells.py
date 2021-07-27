@@ -80,8 +80,8 @@ class CellsSequence(keras.utils.Sequence):
         y = np.zeros((self.batch_size, self.image_size, self.image_size, 1), dtype="uint8")
 
         for i, path in enumerate(batch_x_paths):
-            img = load_img(path, target_size=(self.image_size, self.image_size))
-            x[i] = preprocessing.normalize(np.array([img_to_array(img)]))
+            x[i] = load_img(path, target_size=(self.image_size, self.image_size))
+            # x[i] = preprocessing.normalize(np.array([img_to_array(img)]))
 
         for i, path in enumerate(batch_y_paths):
             img = load_img(path, target_size=(self.image_size, self.image_size))

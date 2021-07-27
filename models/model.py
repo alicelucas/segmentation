@@ -39,8 +39,11 @@ def unet_model():
 
     inputs = tf.keras.layers.Input(shape=[224, 224, 3])
 
+    #Use mobile net's way of preprocessing input
+    normalized = tf.keras.applications.mobilenet_v2.preprocess_input(inputs) #Use mobilenet's preprocessing (maps to [-1, 1] range)
+
     # Downsampling through the model
-    skips = down_stack(inputs)
+    skips = down_stack(normalized)
     x = skips[-1]
     skips = reversed(skips[:-1])
 

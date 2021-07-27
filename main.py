@@ -23,13 +23,13 @@ if __name__ == '__main__':
 
 
     data = Cells.CellsSequence(input_img_paths, target_paths, batch_size, img_size)
-    idx = 12
+    idx = 11
     x, y = data.__getitem__(idx)
     filenames = data.map_filename_indices(idx)
 
     #Visualize input image and ground-truth output
     for i in range(x.shape[0]):
-        io.imsave(f"./images/x.{filenames[i]}.png", x[i] * 255)
+        io.imsave(f"./images/x.{filenames[i]}.png", x[i])
         # print(y.shape)
         # print(color.label2rgb(y[0,:,:,0]).shape)
         io.imsave(f"./images/y.{filenames[i]}_tmp.png", color.label2rgb(y[i,:,:,0]))

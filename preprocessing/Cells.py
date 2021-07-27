@@ -70,13 +70,13 @@ class CellsSequence(keras.utils.Sequence):
         return names
 
 
-    def augment(self, x):
+    def augment(self, x_and_y):
         """
         Given a batch of images and their gt mask, augment it by flipping it (horizontally or vertically), and doing a rotation
         :return: the augmented batch of data
         """
-        x = preprocessing.flip(x)
-        return preprocessing.rotate(x)
+        x_and_y = preprocessing.flip(x_and_y)
+        return preprocessing.rotate(x_and_y)
 
 
     def __getitem__(self, idx):
@@ -85,20 +85,22 @@ class CellsSequence(keras.utils.Sequence):
         batch_x_paths = self.x_paths[idx: idx + self.batch_size]
         batch_y_paths = self.y_paths[idx: idx + self.batch_size]
 
-        x = np.zeros((self.batch_size, self.image_size, self.image_size, 3), dtype="float32") #Input images are RGB
-        y = np.zeros((self.batch_size, self.image_size, self.image_size, 1), dtype="uint8")
+        x_batch = np.zeros((self.batch_size, self.image_size, self.image_size, 3), dtype="float32") #Input images are RGB
+        y_batch = np.zeros((self.batch_size, self.image_size, self.image_size, 1), dtype="uint8")
 
-        for i, path in enumerate(batch_x_paths):
-            x[i] = load_img(path, target_size=(self.image_size, self.image_size))
+        for i in range(len(batch_x_paths)):
+            #load input image
+            baz = load_img(batch_x_paths[i], target_size=(self.image_size, self.image_size))
+            x = np.array(img_to_array(baz), dtype="float32")
 
-        for i, path in enumerate(batch_y_paths):
-            img = load_img(path, target_size=(self.image_size, self.image_size))
-            data = np.array([img_to_array(img)], dtype="uint8")
+            #GT mask
+            foo = load_img(batch_y_paths[i], target_size=(self.image_size, self.image_size))
+            data = np.array([img_to_array(foo)], dtype="uint8")
             mask = self.convert_labels(data[0])
-            y[i] = np.expand_dims(mask, 2)
+            y = np.expand_dims(mask, 2)
 
-        x = self.augment(x)
-        y = self.augment(y)
+            x_batch[i], y_batch[i] = self.augment((x, y))
 
-        return x, y
+
+        return x_batch, y_batch
 

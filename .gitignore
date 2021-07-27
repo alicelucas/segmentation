@@ -1,4 +1,3 @@
-x.012.png
 mask.png
 utils/__pycache__/
 models/__pycache__/
@@ -7,6 +6,4 @@ models/.DS_Store
 .idea/vcs.xml
 data/
 preprocessing/__pycache__/
-x_tmp.png
-y_tmp.png
-
+images/

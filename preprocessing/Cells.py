@@ -54,6 +54,21 @@ class CellsSequence(keras.utils.Sequence):
         return y
 
 
+    def map_filename_indices(self, idx):
+        """
+        Given an idx that for the data point and the batch size, return the indices in the original filenames.
+        This is necessary since the data sequence was shuffled randomly, so index 0 does not actually correspond to file 0.
+        :param idx:
+        :return: the list of actual indices corresponding to the filenames selected for that batch.
+        """
+        batch_x_paths = self.x_paths[idx: idx + self.batch_size]
+        names = []
+        for path in batch_x_paths:
+            a, b = path.split(".png")
+            names.append(a[-3:])
+        return names
+
+
     def __getitem__(self, idx):
         """Return (input, target) numpy array corresponding to batch idx"""
 

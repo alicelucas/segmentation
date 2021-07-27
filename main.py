@@ -14,7 +14,7 @@ if __name__ == '__main__':
     """
 
     #Load preprocessing
-    batch_size = 1
+    batch_size = 4
     img_size = 1024
     num_classes = 3
 
@@ -26,17 +26,19 @@ if __name__ == '__main__':
 
 
     data = Cells.CellsSequence(input_img_paths, target_paths, batch_size, img_size)
-    x, y = data.__getitem__(15)
+    idx = 12
+    x, y = data.__getitem__(idx)
+    filenames = data.map_filename_indices(idx)
 
     # #TEMPORARY TEST
     # print(x.shape)
     # #Save x
     # Convert whole probability map to color mask
     for i in range(x.shape[0]):
-        io.imsave(f"./images/x{i}_tmp.png", x[i] * 255)
+        io.imsave(f"./images/x.{filenames[i]}.png", x[i] * 255)
         # print(y.shape)
         # print(color.label2rgb(y[0,:,:,0]).shape)
-        io.imsave(f"./images/y{i}_tmp.png", color.label2rgb(y[i,:,:,0]))
+        io.imsave(f"./images/y.{filenames[i]}_tmp.png", color.label2rgb(y[i,:,:,0]))
 
     # #End of temporary test
     # exit()
@@ -79,4 +81,4 @@ if __name__ == '__main__':
     #Convert whole probability map to color mask
     for i in range(probs.shape[0]):
         mask = preprocessing.prob_to_mask(probs[i])
-        io.imsave(f'images/mask_{i}.png', mask)
+        io.imsave(f'images/mask.{filenames[i]}.png', mask)

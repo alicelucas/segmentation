@@ -1,17 +1,14 @@
-from utils import preprocessing
-from models import model
-from skimage import io, color
-import numpy
-import sys
-from preprocessing import Cells
 from os import listdir
 from os.path import isfile, join
 
+import numpy
+from skimage import io, color
+
+from models import model
+from preprocessing import Cells
+from utils import preprocessing
+
 if __name__ == '__main__':
-    """
-    This simple script accepts an image filename as input, patches it up in the desired patch size, and feeds
-    each patch to a UNet model (with a pre-trained MobileNet backbone but random decoded)
-    """
 
     #Load preprocessing
     batch_size = 4

@@ -14,6 +14,7 @@ class CellsSequence(keras.utils.Sequence):
 
     def __init__(self, x_paths, y_paths, batch_size, image_size):
         self.x_paths, self.y_paths = x_paths, y_paths
+        #Randomize the dataset here
         random.Random(1337).shuffle(self.x_paths)
         random.Random(1337).shuffle(self.y_paths)
 

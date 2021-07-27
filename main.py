@@ -30,22 +30,14 @@ if __name__ == '__main__':
     x, y = data.__getitem__(idx)
     filenames = data.map_filename_indices(idx)
 
-    # #TEMPORARY TEST
-    # print(x.shape)
-    # #Save x
-    # Convert whole probability map to color mask
+    #Visualize input image and ground-truth output
     for i in range(x.shape[0]):
         io.imsave(f"./images/x.{filenames[i]}.png", x[i] * 255)
         # print(y.shape)
         # print(color.label2rgb(y[0,:,:,0]).shape)
         io.imsave(f"./images/y.{filenames[i]}_tmp.png", color.label2rgb(y[i,:,:,0]))
 
-    # #End of temporary test
-    # exit()
-
-    # im = io.imread(filename, as_gray=True)
-    # im = preprocessing.normalize(im) #Convert to float and range [0, 1]
-
+    #Initialize model
     unet = model.unet_model()
 
     #Code below prepares patch extraction process

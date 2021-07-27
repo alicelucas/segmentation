@@ -1,8 +1,11 @@
-from tensorflow import keras
+import random
+
 import numpy as np
+from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
-from skimage import io, transform
+
 from utils import preprocessing
+
 
 class CellsSequence(keras.utils.Sequence):
     """
@@ -11,6 +14,9 @@ class CellsSequence(keras.utils.Sequence):
 
     def __init__(self, x_paths, y_paths, batch_size, image_size):
         self.x_paths, self.y_paths = x_paths, y_paths
+        random.Random(1337).shuffle(self.x_paths)
+        random.Random(1337).shuffle(self.y_paths)
+
         self.batch_size = batch_size
         self.image_size = image_size
 
@@ -51,8 +57,8 @@ class CellsSequence(keras.utils.Sequence):
     def __getitem__(self, idx):
         """Return (input, target) numpy array corresponding to batch idx"""
 
-        batch_x_paths = self.x_paths[idx * self.batch_size:(idx + 1) * self.batch_size]
-        batch_y_paths = self.y_paths[idx * self.batch_size:(idx + 1) * self.batch_size]
+        batch_x_paths = self.x_paths[idx: idx + self.batch_size]
+        batch_y_paths = self.y_paths[idx: idx + self.batch_size]
 
         x = np.zeros((self.batch_size, self.image_size, self.image_size, 3), dtype="float32") #Input images are RGB
         y = np.zeros((self.batch_size, self.image_size, self.image_size, 1), dtype="uint8")

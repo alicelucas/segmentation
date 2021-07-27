@@ -7,3 +7,6 @@ models/.DS_Store
 .idea/vcs.xml
 data/
 preprocessing/__pycache__/
+x_tmp.png
+y_tmp.png
+

@@ -2,6 +2,7 @@ from tensorflow import keras
 import numpy as np
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from skimage import io, transform
+from utils import preprocessing
 
 class CellsSequence(keras.utils.Sequence):
     """
@@ -58,7 +59,7 @@ class CellsSequence(keras.utils.Sequence):
 
         for i, path in enumerate(batch_x_paths):
             img = load_img(path, target_size=(self.image_size, self.image_size))
-            x[i] = np.array([img_to_array(img)])
+            x[i] = preprocessing.normalize(np.array([img_to_array(img)]))
 
         for i, path in enumerate(batch_y_paths):
             img = load_img(path, target_size=(self.image_size, self.image_size))

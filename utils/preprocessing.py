@@ -22,11 +22,11 @@ def to_tensor(x):
   return x
 
 
-def create_mask(pred_mask):
+def prob_to_mask(pred_mask):
   """
   From array of probabilities to a single image with most likely category having its own color
   :param pred_mask: output of the neural network, size (B, N, M, n) where n is number of classes
   :return: (N, M) image color-coded by class where prob is max
   """
   label = numpy.argmax(pred_mask, axis=-1)
-  return color.label2rgb(label[0])
+  return color.label2rgb(label)

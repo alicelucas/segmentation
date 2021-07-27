@@ -10,6 +10,11 @@ def unet_model():
 
     output_channels = 3
 
+    data_augmentation = tf.keras.Sequential([
+        tf.keras.layers.experimental.preprocessing.RandomFlip('horizontal'),
+        tf.keras.layers.experimental.preprocessing.RandomRotation(0.5),
+    ])
+
     #Instantiate model using stored weights
     base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape=[224, 224, 3], include_top=False,
                                                                 weights="./weights/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_1.0_128_no_top.h5") #Instantiate architecture
@@ -39,8 +44,10 @@ def unet_model():
 
     inputs = tf.keras.layers.Input(shape=[224, 224, 3])
 
+    augmented = data_augmentation(inputs)
+
     #Use mobile net's way of preprocessing input
-    normalized = tf.keras.applications.mobilenet_v2.preprocess_input(inputs) #Use mobilenet's preprocessing (maps to [-1, 1] range)
+    normalized = tf.keras.applications.mobilenet_v2.preprocess_input(augmented) #Use mobilenet's preprocessing (maps to [-1, 1] range)
 
     # Downsampling through the model
     skips = down_stack(normalized)

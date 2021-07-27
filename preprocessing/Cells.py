@@ -70,6 +70,15 @@ class CellsSequence(keras.utils.Sequence):
         return names
 
 
+    def augment(self, x):
+        """
+        Given a batch of images and their gt mask, augment it by flipping it (horizontally or vertically), and doing a rotation
+        :return: the augmented batch of data
+        """
+        x = preprocessing.flip(x)
+        return preprocessing.rotate(x)
+
+
     def __getitem__(self, idx):
         """Return (input, target) numpy array corresponding to batch idx"""
 
@@ -81,13 +90,15 @@ class CellsSequence(keras.utils.Sequence):
 
         for i, path in enumerate(batch_x_paths):
             x[i] = load_img(path, target_size=(self.image_size, self.image_size))
-            # x[i] = preprocessing.normalize(np.array([img_to_array(img)]))
 
         for i, path in enumerate(batch_y_paths):
             img = load_img(path, target_size=(self.image_size, self.image_size))
             data = np.array([img_to_array(img)], dtype="uint8")
             mask = self.convert_labels(data[0])
             y[i] = np.expand_dims(mask, 2)
+
+        x = self.augment(x)
+        y = self.augment(y)
 
         return x, y
 

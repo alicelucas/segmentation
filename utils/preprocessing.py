@@ -1,25 +1,27 @@
 import numpy
 from skimage import color
+from scipy import ndimage
+import random
 
-def normalize(x):
+def rotate(x):
   """
-  Array is typically read in as int and from [0, 255]. Here we convert to float and normalize to range [0, 1].
-  :param x: the array
-  :return: the normalized array
+  Rotate a batch of image (used for data augmentation) - size B x N x M x C
+  :return: the batch of rotated images
   """
-  return x.astype(float) / 255.0
+  angle = random.uniform(0, 180)
+  return ndimage.rotate(x, angle, (1, 2), reshape=False)
 
-def to_tensor(x):
-  """
-  From a (N, M) shape to a (B, N, M, C) shape
-  :param x: (N, M) patch
-  :return: (B, N, M, C)
-  """
-  x = numpy.expand_dims(x, axis=-1)
-  x = numpy.repeat(x, 3, axis=-1)
-  x = numpy.expand_dims(x, axis=0)
 
-  return x
+def flip(x):
+  """
+  Flips images (used for data augmentation)
+  Half of the time we will do a vertical flip, the other half will perform a horizontal flip.
+  :return: the flipped images
+  """
+  if random.uniform(0, 0.5) > 0.5:
+    return numpy.flip(x, 0)
+  else:
+    return numpy.flip(x, 1)
 
 
 def prob_to_mask(pred_mask):

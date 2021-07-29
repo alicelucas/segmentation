@@ -55,7 +55,7 @@ class CellsGenerator(keras.utils.Sequence):
 
             foo = load_img(y_paths[idx], target_size=(self.image_size, self.image_size))
             data = np.array([img_to_array(foo)], dtype="uint8")
-            mask = self.convert_labels(data[0])
+            mask = preprocessing.convert_labels(data[0])
             y = np.expand_dims(mask, 2)
 
             # number of column directions
@@ -87,38 +87,6 @@ class CellsGenerator(keras.utils.Sequence):
 
 
         return x_patches, y_patches
-
-
-
-    def convert_labels(self, data):
-        """
-        From gt segmentation masks for instance segmentations to 3-class semantic segmentation
-        :return: The three class segmentation mask with (0, 1, 2) labels for background, border, inside cell
-        """
-
-        y = np.zeros((data.shape[0], data.shape[1]), dtype="uint8") #Greyscale
-
-        #Look at R, G, B channels in current mask
-        red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
-
-        #Replace "inside cell labels with 2"
-        cell_label = 178, 178, 178
-        cell_pixels = (red == cell_label[0]) & (green == cell_label[1]) & (blue == cell_label[2]) #Get pixel indices that have that color
-        #pixels is a (image_size, image_size) array with True and False values
-        y[cell_pixels] = 2
-
-        #Replace background label with 0
-        background_label = 0, 0, 0
-        background_pixels = (red == background_label[0]) & (green == background_label[1]) & (
-                    blue == background_label[2])
-        y[background_pixels] = 0
-
-        # Replace border label with 1
-        #Here making the assumption that everything that is not background or cell was labeled as border
-        border_pixels = np.logical_not(np.logical_or(background_pixels, cell_pixels))
-        y[border_pixels] = 1
-
-        return y
 
 
     def map_filename_indices(self, idx):

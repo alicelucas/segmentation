@@ -5,6 +5,7 @@ from skimage import io, color
 
 from input import Cells
 from test import test
+from train import train
 from utils import preprocessing
 
 if __name__ == '__main__':
@@ -20,8 +21,11 @@ if __name__ == '__main__':
     input_img_paths = [join(image_dir, f) for f in listdir(image_dir) if isfile(join(image_dir, f))]
     target_paths = [join(target_dir, f) for f in listdir(target_dir) if isfile(join(target_dir, f))]
 
+    train.train()
 
-    data = Cells.CellsSequence(input_img_paths, target_paths, batch_size, img_size)
+    exit()
+
+    data = Cells.CellsGenerator(input_img_paths, target_paths, batch_size, img_size)
     idx = 11
     x, y = data.__getitem__(idx)
     filenames = data.map_filename_indices(idx)

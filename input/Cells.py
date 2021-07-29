@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from utils import preprocessing
 
 
-class CellsSequence(keras.utils.Sequence):
+class CellsGenerator(keras.utils.Sequence):
     """
     Helper class to iterate over the input (from file paths to numpy arrays)
     """

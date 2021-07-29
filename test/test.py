@@ -1,8 +1,6 @@
 import numpy
 from models import model
 from input import Cells
-from os import listdir
-from os.path import isfile, join
 from utils import preprocessing
 from skimage import io, color
 
@@ -24,7 +22,7 @@ def forward_pass(model_name, num_classes):
         input_img_paths = ["data/maddox/images/x.016.png"]
         target_paths = ["data/maddox/masks/x.016.png"]
 
-        batch_size = 4
+        batch_size = 1
         patch_size = 224
         image_size = 1024
         pad_size = 8
@@ -38,5 +36,5 @@ def forward_pass(model_name, num_classes):
             patch_prob = patch_prob[:, pad_size: patch.shape[1] - pad_size, pad_size: patch.shape[2] - pad_size, :]
 
             mask = preprocessing.prob_to_mask(patch_prob[0])
-            io.imsave(f'images/mask.{filenames[i]}_{i}.png', mask)
+            io.imsave(f'images/mask.{filenames[0]}_{i}.png', mask)
 

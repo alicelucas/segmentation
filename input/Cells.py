@@ -15,6 +15,8 @@ class CellsGenerator(keras.utils.Sequence):
     def __init__(self, x_paths, y_paths, batch_size, patch_size, image_size, pad_size):
         self.batch_size = batch_size
         self.patch_size = patch_size
+
+        self.image_size = image_size
         self.pad_size = 8
 
         self.x_paths = []
@@ -22,7 +24,6 @@ class CellsGenerator(keras.utils.Sequence):
 
         self.x_patches, self.y_patches = self.create_patches(x_paths, y_paths)
 
-        self.image_size = image_size
 
         #Randomize the dataset here
         random.Random(1337).shuffle(self.x_patches)
@@ -49,10 +50,10 @@ class CellsGenerator(keras.utils.Sequence):
         y_patches = []
 
         for idx, x_path in enumerate(x_paths):
-            baz = load_img(x_path, target_size=(self.patch_size, self.patch_size))
+            baz = load_img(x_path, target_size=(self.image_size, self.image_size))
             x = np.array(img_to_array(baz), dtype="float32")
 
-            foo = load_img(y_paths[idx], target_size=(self.patch_size, self.patch_size))
+            foo = load_img(y_paths[idx], target_size=(self.image_size, self.image_size))
             data = np.array([img_to_array(foo)], dtype="uint8")
             mask = self.convert_labels(data[0])
             y = np.expand_dims(mask, 2)
@@ -95,7 +96,7 @@ class CellsGenerator(keras.utils.Sequence):
         :return: The three class segmentation mask with (0, 1, 2) labels for background, border, inside cell
         """
 
-        y = np.zeros((self.patch_size, self.patch_size), dtype="uint8") #Greyscale
+        y = np.zeros((data.shape[0], data.shape[1]), dtype="uint8") #Greyscale
 
         #Look at R, G, B channels in current mask
         red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]

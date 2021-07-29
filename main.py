@@ -23,6 +23,7 @@ if __name__ == '__main__':
     target_paths = [join(target_dir, f) for f in listdir(target_dir) if isfile(join(target_dir, f))]
 
     test.forward_pass("unet", num_classes)
+    #FIXME Make code above work before attempting train.train()
 
     # train.train()
     #

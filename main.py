@@ -3,13 +3,13 @@ from os.path import isfile, join
 
 from skimage import io, color
 
-from preprocessing import Cells
+from input import Cells
 from test import test
 from utils import preprocessing
 
 if __name__ == '__main__':
 
-    #Load preprocessing
+    #Load input
     batch_size = 4
     img_size = 1024
     num_classes = 3

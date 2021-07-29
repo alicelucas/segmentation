@@ -46,8 +46,8 @@ def unet_model():
 
     augmented = data_augmentation(inputs)
 
-    #Use mobile net's way of preprocessing input
-    normalized = tf.keras.applications.mobilenet_v2.preprocess_input(augmented) #Use mobilenet's preprocessing (maps to [-1, 1] range)
+    #Use mobile net's way of input input
+    normalized = tf.keras.applications.mobilenet_v2.preprocess_input(augmented) #Use mobilenet's input (maps to [-1, 1] range)
 
     # Downsampling through the model
     skips = down_stack(normalized)

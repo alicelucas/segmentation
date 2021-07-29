@@ -9,7 +9,7 @@ from utils import preprocessing
 
 class CellsSequence(keras.utils.Sequence):
     """
-    Helper class to iterate over the preprocessing (from file paths to numpy arrays)
+    Helper class to iterate over the input (from file paths to numpy arrays)
     """
 
     def __init__(self, x_paths, y_paths, batch_size, image_size):

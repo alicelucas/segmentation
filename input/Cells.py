@@ -12,17 +12,82 @@ class CellsGenerator(keras.utils.Sequence):
     Helper class to iterate over the input (from file paths to numpy arrays)
     """
 
-    def __init__(self, x_paths, y_paths, batch_size, image_size):
-        self.x_paths, self.y_paths = x_paths, y_paths
+    def __init__(self, x_paths, y_paths, batch_size, patch_size, image_size, pad_size):
+        self.batch_size = batch_size
+        self.patch_size = patch_size
+        self.pad_size = 8
+
+        self.x_paths = []
+        self.y_paths = []
+
+        self.x_patches, self.y_patches = self.create_patches(x_paths, y_paths)
+
+        self.image_size = image_size
+
         #Randomize the dataset here
+        random.Random(1337).shuffle(self.x_patches)
+        random.Random(1337).shuffle(self.y_patches)
         random.Random(1337).shuffle(self.x_paths)
         random.Random(1337).shuffle(self.y_paths)
 
-        self.batch_size = batch_size
-        self.image_size = image_size
+
 
     def __len__(self):
-        return len(self.x_paths) // self.batch_size
+        return len(self.x_patches) // self.batch_size
+
+
+    def create_patches(self, x_paths, y_paths):
+        """
+        :param x_paths: list of paths of image
+        :param y_paths: list of paths of label masks
+        :return: list of patches
+        """
+        # Code below prepares patch extraction process for inference when testing
+        patch_size = self.patch_size - 2 * self.pad_size  # account for padding
+
+        x_patches = []
+        y_patches = []
+
+        for idx, x_path in enumerate(x_paths):
+            baz = load_img(x_path, target_size=(self.patch_size, self.patch_size))
+            x = np.array(img_to_array(baz), dtype="float32")
+
+            foo = load_img(y_paths[idx], target_size=(self.patch_size, self.patch_size))
+            data = np.array([img_to_array(foo)], dtype="uint8")
+            mask = self.convert_labels(data[0])
+            y = np.expand_dims(mask, 2)
+
+            # number of column directions
+            n_row = x.shape[1] // patch_size
+            n_col = x.shape[0] // patch_size
+
+            # pad whole image so that we can account for border effects
+            pad_row = int(np.floor((n_row + 1) * patch_size - x.shape[2]) / 2)
+            pad_col = int(np.floor((n_col + 1) * patch_size - x.shape[1]) / 2)
+
+            x_padded = np.pad(x, ((pad_col, pad_col), (pad_row, pad_row), (0, 0)))
+            y_padded = np.pad(y, ((pad_col, pad_col), (pad_row, pad_row), (0, 0)))
+
+
+            # Extract patches over image
+            for i in range(n_row + 1):
+                for j in range(n_col + 1):
+                    patch = x_padded[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1), :]  # extract patch
+                    patch = np.pad(patch, ((8, 8), (8, 8), (0, 0)))  # add padding
+                    x_patches.append(patch)
+
+                    patch = y_padded[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1),
+                            :]  # extract patch
+                    patch = np.pad(patch, ((8, 8), (8, 8), (0, 0)))  # add padding
+                    y_patches.append(patch)
+
+                    self.x_paths.append(x_paths[idx]) #keep track of which patch belongs to which image
+                    self.y_paths.append(y_paths[idx])
+
+
+        return x_patches, y_patches
+
+
 
     def convert_labels(self, data):
         """
@@ -30,7 +95,7 @@ class CellsGenerator(keras.utils.Sequence):
         :return: The three class segmentation mask with (0, 1, 2) labels for background, border, inside cell
         """
 
-        y = np.zeros((self.image_size, self.image_size), dtype="uint8") #Greyscale
+        y = np.zeros((self.patch_size, self.patch_size), dtype="uint8") #Greyscale
 
         #Look at R, G, B channels in current mask
         red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
@@ -79,27 +144,18 @@ class CellsGenerator(keras.utils.Sequence):
         return preprocessing.rotate(x_and_y)
 
 
-    def __getitem__(self, idx):
+    def __getitem__(self, batch_idx):
         """Return (input, target) numpy array corresponding to batch idx"""
 
-        batch_x_paths = self.x_paths[idx: idx + self.batch_size]
-        batch_y_paths = self.y_paths[idx: idx + self.batch_size]
+        x_patches = self.x_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
+        y_patches = self.y_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
 
-        x_batch = np.zeros((self.batch_size, self.image_size, self.image_size, 3), dtype="float32") #Input images are RGB
-        y_batch = np.zeros((self.batch_size, self.image_size, self.image_size, 1), dtype="uint8")
+        x_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, 3), dtype="float32") #Input images are RGB
+        y_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, 1), dtype="uint8")
 
-        for i in range(len(batch_x_paths)):
-            #load input image
-            baz = load_img(batch_x_paths[i], target_size=(self.image_size, self.image_size))
-            x = np.array(img_to_array(baz), dtype="float32")
-
-            #GT mask
-            foo = load_img(batch_y_paths[i], target_size=(self.image_size, self.image_size))
-            data = np.array([img_to_array(foo)], dtype="uint8")
-            mask = self.convert_labels(data[0])
-            y = np.expand_dims(mask, 2)
-
-            x_batch[i], y_batch[i] = self.augment((x, y))
+        #Go through each patch in batch and augment it
+        for i in range(len(x_patches)):
+            x_batch[i], y_batch[i] = self.augment((x_patches[i], y_patches[i])) #Place augmented patch in batch
 
 
         return x_batch, y_batch

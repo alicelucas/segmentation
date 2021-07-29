@@ -14,6 +14,7 @@ if __name__ == '__main__':
     batch_size = 4
     img_size = 1024
     num_classes = 3
+    patch_size = 224
 
     #Get list of input files and target masks
     image_dir = "data/maddox/images"
@@ -21,11 +22,13 @@ if __name__ == '__main__':
     input_img_paths = [join(image_dir, f) for f in listdir(image_dir) if isfile(join(image_dir, f))]
     target_paths = [join(target_dir, f) for f in listdir(target_dir) if isfile(join(target_dir, f))]
 
-    train.train()
+    test.forward_pass("unet", num_classes)
 
-    exit()
+    # train.train()
+    #
+    # exit()
 
-    data = Cells.CellsGenerator(input_img_paths, target_paths, batch_size, img_size)
+    data = Cells.CellsGenerator(input_img_paths, target_paths, batch_size, patch_size, image_size=img_size)
     idx = 11
     x, y = data.__getitem__(idx)
     filenames = data.map_filename_indices(idx)

@@ -7,3 +7,5 @@ models/.DS_Store
 data/
 input/__pycache__/
 images/
+train/__pycache__/
+test/__pycache__/

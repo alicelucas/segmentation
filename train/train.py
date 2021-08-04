@@ -28,7 +28,7 @@ def train_unet():
     numpy.random.shuffle(all_idx)
     val_train_idx = numpy.split(all_idx, [int(0.2 * len(input_img_paths)), int((1 - validation_percentage) * len(input_img_paths))])
 
-    batch_size = 64
+    batch_size = 4
 
     patch_size = 224
     image_size = 1024

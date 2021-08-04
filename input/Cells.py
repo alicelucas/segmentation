@@ -67,16 +67,25 @@ class CellsGenerator(keras.utils.Sequence):
             # Extract patches over image
             for i in range(n_row):
                 for j in range(n_col):
+
+                    #Extract y-patch
+                    patch = y[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1),
+                            :]  # extract patch
+
+                    #Only keep the patch if it has non-zero labels (i.e., not just black)
+                    if 1 not in patch[:, :, 0]:
+                        continue
+
+                    patch = np.pad(patch, ((pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
+                    y_patches.append(patch)
+
+                    # Extract x-patch
                     patch = x[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1), :]  #extract patch
                     patch = np.pad(patch, ((pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
                     x_patches.append(patch)
 
-                    patch = y[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1),
-                            :]  # extract patch
-                    patch = np.pad(patch, ((pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
-                    y_patches.append(patch)
-
-                    self.x_paths.append(x_paths[idx]) #keep track of which patch belongs to which image
+                    # keep track of which patch belongs to which image
+                    self.x_paths.append(x_paths[idx])
                     self.y_paths.append(y_paths[idx])
 
 

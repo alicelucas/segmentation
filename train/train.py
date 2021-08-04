@@ -36,14 +36,12 @@ def train_unet():
     training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, image_size)
     validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, image_size )
 
-    # #TEMPORARY DEBUG
-    # x_patches = training_generator.x_patches
-    # y_patches = training_generator.y_patches
-    # idx = 200
+    # ##TEMPORARY DEBUG
+    # x_batch, y_batch = training_generator.__getitem__(4)
     # # Visualize input image and ground-truth output
-    # io.imsave(f"./images/x_patch.png", x_patches[idx])
-    # io.imsave(f"./images/y_patch.png", color.label2rgb(y_patches[idx][:, :, 0]))
-    #END OF TEMPORARY DEBUG
+    # io.imsave(f"./images/x_patch.png", x_batch[1])
+    # io.imsave(f"./images/y_patch.png", color.label2rgb(y_batch[1][:, :, 0]))
+    # ##END OF TEMPORARY DEBUG
 
 
     history = unet.fit_generator(training_generator,

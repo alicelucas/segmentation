@@ -1,5 +1,5 @@
 from test import test
-
+from train import train
 import numpy
 
 if __name__ == '__main__':
@@ -8,4 +8,5 @@ if __name__ == '__main__':
     image_dir = "data/maddox/images"
     filename = "018.png"
 
-    test.test_unet(image_dir, filename)
+    # test.test_unet(image_dir, filename)
+    train.train_unet()

@@ -12,9 +12,6 @@ def train_unet():
 
     base_learning_rate = 0.0001
 
-    unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
-                  loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-                  metrics=['accuracy'])
 
     validation_percentage = 0.2
 
@@ -28,7 +25,7 @@ def train_unet():
     numpy.random.shuffle(all_idx)
     val_train_idx = numpy.split(all_idx, [int(0.2 * len(input_img_paths)), int((1 - validation_percentage) * len(input_img_paths))])
 
-    batch_size = 4
+    batch_size = 2
 
     patch_size = 224
     image_size = 1024
@@ -43,6 +40,9 @@ def train_unet():
     # io.imsave(f"./images/y_patch.png", color.label2rgb(y_batch[1][:, :, 0]))
     # ##END OF TEMPORARY DEBUG
 
+    unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
 
-    history = unet.fit_generator(training_generator,
+    history = unet.fit(training_generator,
                         validation_data=validation_generator)

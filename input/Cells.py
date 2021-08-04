@@ -49,6 +49,8 @@ class CellsGenerator(keras.utils.Sequence):
         x_patches = []
         y_patches = []
 
+        pad_size = 8
+
         for idx, x_path in enumerate(x_paths):
             baz = load_img(x_path, target_size=(self.image_size, self.image_size))
             x = np.array(img_to_array(baz), dtype="float32")
@@ -59,19 +61,19 @@ class CellsGenerator(keras.utils.Sequence):
             y = np.expand_dims(mask, 2)
 
             # number of column directions
-            n_row = x.shape[1] // patch_size
-            n_col = x.shape[0] // patch_size
+            n_row = x.shape[1] // (patch_size + 2 * pad_size)
+            n_col = x.shape[0] // (patch_size + 2 * pad_size)
 
             # Extract patches over image
-            for i in range(n_row + 1):
-                for j in range(n_col + 1):
+            for i in range(n_row):
+                for j in range(n_col):
                     patch = x[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1), :]  #extract patch
-                    patch = np.pad(patch, ((8, 8), (8, 8), (0, 0)))  # add padding
+                    patch = np.pad(patch, ((pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
                     x_patches.append(patch)
 
                     patch = y[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1),
                             :]  # extract patch
-                    patch = np.pad(patch, ((8, 8), (8, 8), (0, 0)))  # add padding
+                    patch = np.pad(patch, ((pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
                     y_patches.append(patch)
 
                     self.x_paths.append(x_paths[idx]) #keep track of which patch belongs to which image

@@ -13,7 +13,6 @@ def train_unet():
 
     base_learning_rate = 0.0001
 
-
     validation_percentage = 0.2
 
     # Get list of input files and target masks

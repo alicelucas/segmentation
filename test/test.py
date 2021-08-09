@@ -1,4 +1,5 @@
-from os.path import join
+from os.path import join, exists
+from os import makedirs
 
 import numpy
 from PIL import Image
@@ -12,7 +13,7 @@ def test_unet(filepath):
     """
     Given file path, do a forward pass
     :param filepath: path to file
-    :return:
+    :return: nothing. Saves output prediction to an "images" directory.
     """
     # Load input
     num_classes = 3
@@ -22,9 +23,11 @@ def test_unet(filepath):
     image_dir = filepath[:slash]
     filename = filepath[slash + 1:]
 
-    # Get list of input files and target masks
+    # Get list of input files and target mask
+    # Here we assume directory structue is name/masks/*.png and name/images/*.png
+    slash = image_dir.rfind("/")
+    target_dir = join(image_dir[:slash], "masks")
 
-    target_dir = "data/maddox/masks"
     x_image = Image.open(join(image_dir, "x." + filename))
     x_grey = numpy.asarray(x_image, dtype="float32")
     x = numpy.stack((x_grey,) * 3, axis=-1)
@@ -33,16 +36,20 @@ def test_unet(filepath):
     y_pre = numpy.asarray(y_image, dtype="uint8")
     y = preprocessing.convert_labels(y_pre)
 
+    save_dir = "./images"
+    if not exists(save_dir):
+        makedirs(save_dir)
+
     # Visualize input image and ground-truth output
-    io.imsave(f"./images/x.{filename}", x[:, :, 0])
-    io.imsave(f"./images/y.{filename}", color.label2rgb(y))
+    io.imsave(f"{save_dir}/x.{filename}", x[:, :, 0])
+    io.imsave(f"{save_dir}/y.{filename}", color.label2rgb(y))
 
     # Make inference pass
     probs = forward_pass(x[numpy.newaxis, :, :, :], num_classes)
 
     # Convert whole probability map to color mask for each example in image
     mask = preprocessing.prob_to_mask(probs[0])
-    io.imsave(f'images/mask.{filename}', mask)
+    io.imsave(f'{save_dir}/mask.{filename}', mask)
 
 
 def forward_pass(x, num_classes):

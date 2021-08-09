@@ -23,16 +23,20 @@ def test_unet(filepath):
     image_dir = filepath[:slash]
     filename = filepath[slash + 1:]
 
+    #Parse filenumber (follows maddox dataset structure)
+    nindex = filename.rfind(".")
+    filenumber = filename[nindex-3:nindex]
+
     # Get list of input files and target mask
     # Here we assume directory structue is name/masks/*.png and name/images/*.png
     slash = image_dir.rfind("/")
     target_dir = join(image_dir[:slash], "masks")
 
-    x_image = Image.open(join(image_dir, "x." + filename))
+    x_image = Image.open(join(image_dir, filename))
     x_grey = numpy.asarray(x_image, dtype="float32")
     x = numpy.stack((x_grey,) * 3, axis=-1)
 
-    y_image = Image.open(join(target_dir, "x." + filename))
+    y_image = Image.open(join(target_dir, filename))
     y_pre = numpy.asarray(y_image, dtype="uint8")
     y = preprocessing.convert_labels(y_pre)
 
@@ -41,15 +45,15 @@ def test_unet(filepath):
         makedirs(save_dir)
 
     # Visualize input image and ground-truth output
-    io.imsave(f"{save_dir}/x.{filename}", x[:, :, 0])
-    io.imsave(f"{save_dir}/y.{filename}", color.label2rgb(y))
+    io.imsave(f"{save_dir}/{filename}", x[:, :, 0])
+    io.imsave(f"{save_dir}/{filename}", color.label2rgb(y))
 
     # Make inference pass
     probs = forward_pass(x[numpy.newaxis, :, :, :], num_classes)
 
     # Convert whole probability map to color mask for each example in image
     mask = preprocessing.prob_to_mask(probs[0])
-    io.imsave(f'{save_dir}/mask.{filename}', mask)
+    io.imsave(f'{save_dir}/mask.{filenumber}.png', mask)
 
 
 def forward_pass(x, num_classes):

@@ -1,10 +1,11 @@
-from models import model
-from input import Cells
-import tensorflow as tf
-from os.path import join, isfile
 from os import listdir
+from os.path import join, isfile
+
 import numpy
-from skimage import io, color
+import tensorflow as tf
+
+from input import Cells
+from models import model
 
 
 def train_unet():

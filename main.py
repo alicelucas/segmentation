@@ -1,7 +1,7 @@
+import sys
+
 from test import test
 from train import train
-import numpy
-import sys
 
 if __name__ == '__main__':
 

@@ -1,5 +1,4 @@
-from os import listdir
-from os.path import isfile, join
+from os.path import join
 
 import numpy
 from PIL import Image

@@ -9,15 +9,19 @@ from models import model
 from utils import preprocessing
 
 
-def test_unet(image_dir, filename):
+def test_unet(filepath):
     """
-    Given image directory and the filename, do a forward pass
-    :param image_dir:
-    :param filename:
+    Given file path, do a forward pass
+    :param filepath: path to file
     :return:
     """
     # Load input
     num_classes = 3
+
+    #Parse image dir and filename:
+    slash = filepath.rfind("/")
+    image_dir = filepath[:slash]
+    filename = filepath[slash + 1:]
 
     # Get list of input files and target masks
 

@@ -5,22 +5,18 @@ import sys
 
 if __name__ == '__main__':
 
-    #Image to do a forward pass on
-    # image_dir = "data/maddox/images"
-    # filename = "018.png"
+    #For testing:
+    #python main.py test data/maddox/images/018.png
+    #For training
+    #python main.py train
 
     if sys.argv[1] == "test":
         if not sys.argv[2]:
-            print("Please provide an image_dir and filename to test")
+            print("Please provide an image file path to test")
             exit(0)
         else:
-            image_dir = sys.argv[2]
-        if not sys.argv[3]:
-            print("Please provide a filename to test")
-            exit(0)
-        else:
-            filename = sys.argv[3]
-            test.test_unet(image_dir, filename)
+            filepath = sys.argv[2]
+            test.test_unet(filepath)
 
     elif sys.argv[1] == "train":
         train.train_unet()

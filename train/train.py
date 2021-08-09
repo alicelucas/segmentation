@@ -44,5 +44,8 @@ def train_unet():
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    history = unet.fit(training_generator,
+    unet.fit(training_generator,
                         validation_data=validation_generator)
+
+    #TODO: Try to load saved model and do another prediction
+    unet.save("./unet.h5")

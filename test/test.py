@@ -8,6 +8,8 @@ from skimage import io, color
 from models import model
 from utils import preprocessing
 
+from tensorflow.keras import models
+
 
 def test_unet(filepath):
     """
@@ -46,25 +48,32 @@ def test_unet(filepath):
 
     # Visualize input image and ground-truth output
     io.imsave(f"{save_dir}/{filename}", x[:, :, 0])
-    io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y))
+    io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y, bg_label=0))
 
     # Make inference pass
+    # probs = forward_pass(x[numpy.newaxis, :, :, :], num_classes, pretrained=True)
     probs = forward_pass(x[numpy.newaxis, :, :, :], num_classes)
+
 
     # Convert whole probability map to color mask for each example in image
     mask = preprocessing.prob_to_mask(probs[0])
     io.imsave(f'{save_dir}/mask.{filenumber}.png', mask)
 
 
-def forward_pass(x, num_classes):
+def forward_pass(x, num_classes, pretrained=False):
     """
     Given input, forward pass through model. If needed, patch up image.
     :param input: (B, N, M, C) input (full image)
     :param num_classes
+    :param pretrained: if False, then we use the random head decoder. If true, we use the unet.h5 weights that have been saved to home
     :return: The probability map of the size of the input image
     """
     # Initialize model
-    unet = model.unet_model()
+    if pretrained:
+        unet = models.load_model('./unet.h5')
+    else:
+        unet = model.unet_model()
+
 
     # Code below prepares patch extraction process for inference when testing
     pad_size = 8

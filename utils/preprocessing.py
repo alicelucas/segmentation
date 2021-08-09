@@ -69,4 +69,4 @@ def prob_to_mask(pred_mask):
   :return: (N, M) image color-coded by class where prob is max
   """
   label = numpy.argmax(pred_mask, axis=-1)
-  return color.label2rgb(label)
+  return color.label2rgb(label, bg_label=0)

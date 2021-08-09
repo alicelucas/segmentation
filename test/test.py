@@ -40,13 +40,13 @@ def test_unet(filepath):
     y_pre = numpy.asarray(y_image, dtype="uint8")
     y = preprocessing.convert_labels(y_pre)
 
-    save_dir = "./images"
+    save_dir = "."
     if not exists(save_dir):
         makedirs(save_dir)
 
     # Visualize input image and ground-truth output
     io.imsave(f"{save_dir}/{filename}", x[:, :, 0])
-    io.imsave(f"{save_dir}/{filename}", color.label2rgb(y))
+    io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y))
 
     # Make inference pass
     probs = forward_pass(x[numpy.newaxis, :, :, :], num_classes)

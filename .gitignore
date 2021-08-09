@@ -9,3 +9,4 @@ input/__pycache__/
 images/
 train/__pycache__/
 test/__pycache__/
+*.png

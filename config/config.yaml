@@ -1,0 +1,17 @@
+train: True
+test_filepath: data/images/x.018.png
+use_saved_model: True
+
+train_image_dir: data/maddox/images
+train_mask_dir: data/maddox/masks
+save_dir: .
+
+input_size: 224
+image_size: 1024
+pad_size: 8
+
+validation_percentage: 0.2
+lr: 0.01
+batch_size: 8
+optimizer: Adam
+saved_model_name: unet.h5

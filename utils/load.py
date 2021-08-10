@@ -1,7 +1,7 @@
 from os.path import join
 import yaml
 
-CONFIG_PATH = "../config"
+CONFIG_PATH = "./config"
 
 def load_config(config_name):
 

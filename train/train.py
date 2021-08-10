@@ -15,7 +15,7 @@ def train_unet(config):
     unet = model.unet_model()
 
     base_learning_rate = config["lr"]
-
+    epochs = config["epochs"]
     validation_percentage = config["validation_percentage"]
 
     # Get list of input files and target masks
@@ -47,7 +47,7 @@ def train_unet(config):
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    unet.fit(training_generator,
+    unet.fit(training_generator, epochs=epochs,
                         validation_data=validation_generator)
 
     model_name = config["saved_model_name"]

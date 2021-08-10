@@ -11,3 +11,4 @@ train/__pycache__/
 test/__pycache__/
 *.png
 *.h5
+config/

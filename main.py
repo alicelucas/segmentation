@@ -1,27 +1,13 @@
-import sys
-
 from test import test
 from train import train
+from utils.load import load_config
 
 if __name__ == '__main__':
 
-    #For testing:
-    #python main.py test data/maddox/images/018.png
-    #For training
-    #python main.py train
+    config = load_config("config.yaml")
 
-    if sys.argv[1] == "test":
-        if not sys.argv[2]:
-            print("Please provide an image file path to test")
-            exit(0)
-        else:
-            filepath = sys.argv[2]
-            test.test_unet(filepath)
-
-    elif sys.argv[1] == "train":
-        train.train_unet()
+    if not config["train"]:
+        test.test_unet(config)
 
     else:
-        print("Please specify whether you would like to train or test the Unet model")
-
-
+        train.train_unet(config)

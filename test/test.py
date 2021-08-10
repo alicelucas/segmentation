@@ -11,14 +11,18 @@ from utils import preprocessing
 from tensorflow.keras import models
 
 
-def test_unet(filepath):
+def test_unet(config):
     """
     Given file path, do a forward pass
-    :param filepath: path to file
+    :param config: configuration params
     :return: nothing. Saves output prediction to an "images" directory.
     """
     # Load input
     num_classes = 3
+
+    filepath = config["test_filepath"]
+    input_size = config["input_size"]
+    pad_size = config["pad_size"]
 
     #Parse image dir and filename:
     slash = filepath.rfind("/")
@@ -42,7 +46,7 @@ def test_unet(filepath):
     y_pre = numpy.asarray(y_image, dtype="uint8")
     y = preprocessing.convert_labels(y_pre)
 
-    save_dir = "."
+    save_dir = config["save_dir"]
     if not exists(save_dir):
         makedirs(save_dir)
 
@@ -51,8 +55,8 @@ def test_unet(filepath):
     io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y, bg_label=0))
 
     # Make inference pass
-    # probs = forward_pass(x[numpy.newaxis, :, :, :], num_classes, pretrained=True)
-    probs = forward_pass(x[numpy.newaxis, :, :, :], num_classes)
+    pretrained = config["use_saved_model"] #If we want to make a prediction using an already trained model (trained by us)
+    probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, pad_size, num_classes, pretrained=pretrained)
 
 
     # Convert whole probability map to color mask for each example in image
@@ -60,10 +64,12 @@ def test_unet(filepath):
     io.imsave(f'{save_dir}/mask.{filenumber}.png', mask)
 
 
-def forward_pass(x, num_classes, pretrained=False):
+def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
     """
     Given input, forward pass through model. If needed, patch up image.
     :param input: (B, N, M, C) input (full image)
+    :param input_size: the input size of the patch that goes to neural net
+    :param pad_size: the pad size used to pad the input to avoid border effects
     :param num_classes
     :param pretrained: if False, then we use the random head decoder. If true, we use the unet.h5 weights that have been saved to home
     :return: The probability map of the size of the input image
@@ -76,8 +82,6 @@ def forward_pass(x, num_classes, pretrained=False):
 
 
     # Code below prepares patch extraction process for inference when testing
-    pad_size = 8
-    input_size = 224 #MobileNet encoder expects 225 for input size
     patch_size = input_size - 2 * pad_size  # account for padding
 
     # number of patches in row and column directions

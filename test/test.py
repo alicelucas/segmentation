@@ -58,6 +58,8 @@ def test_unet(config):
     pretrained = config["use_saved_model"] #If we want to make a prediction using an already trained model (trained by us)
     probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, pad_size, num_classes, pretrained=pretrained)
 
+    print(probs.shape)
+
 
     # Convert whole probability map to color mask for each example in image
     mask = preprocessing.prob_to_mask(probs[0])
@@ -79,7 +81,6 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
         unet = models.load_model('./unet.h5')
     else:
         unet = model.unet_model()
-
 
     # Code below prepares patch extraction process for inference when testing
     patch_size = input_size - 2 * pad_size  # account for padding
@@ -109,6 +110,7 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
                                                                                                     pad_size: input_size - pad_size,
                                                                                                     pad_size: input_size - pad_size,
                                                                                                     :]
+
 
     # Crop probability mask to original image size
     probs = probs[:, pad_col:-pad_col, pad_row:-pad_row, :]

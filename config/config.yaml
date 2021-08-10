@@ -1,6 +1,6 @@
-train: False
-test_filepath: data/maddox/images/x.018.png
-use_saved_model: True #Whether to evaluate on random model or on pre-trained model (saved unet.h5)
+train: True
+test_filepath: data/maddox/images/x.011.png
+use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
 
 train_image_dir: data/maddox/images
 train_mask_dir: data/maddox/masks
@@ -10,9 +10,10 @@ input_size: 224
 image_size: 1024
 pad_size: 8
 
-validation_percentage: 0.2
-lr: 0.0001
-batch_size: 8
+augmentation: False
+validation_percentage: 0.75
+lr: 0.01
+batch_size: 1
 epochs: 1
 optimizer: Adam
 saved_model_name: unet.h5

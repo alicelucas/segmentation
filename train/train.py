@@ -33,8 +33,13 @@ def train_unet(config):
     patch_size = config["input_size"]
     image_size = config["image_size"]
 
-    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, image_size)
-    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, image_size)
+    should_augment = config["augmentation"]
+
+    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, image_size, should_augment)
+    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, image_size, should_augment)
+
+    print("Number of train examples", training_generator.__len__())
+    print(training_generator.x_paths)
 
     unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),

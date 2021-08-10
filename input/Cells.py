@@ -6,13 +6,14 @@ from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
 from utils import preprocessing
 
+from skimage import io, color
 
 class CellsGenerator(keras.utils.Sequence):
     """
     Helper class to iterate over the input (from file paths to numpy arrays)
     """
 
-    def __init__(self, x_paths, y_paths, batch_size, patch_size, image_size):
+    def __init__(self, x_paths, y_paths, batch_size, patch_size, image_size, should_augment):
         self.batch_size = batch_size
         self.patch_size = patch_size
 
@@ -23,6 +24,8 @@ class CellsGenerator(keras.utils.Sequence):
         self.y_paths = []
 
         self.x_patches, self.y_patches = self.create_patches(x_paths, y_paths)
+
+        self.do_augment = should_augment
 
 
         #Randomize the dataset here
@@ -51,6 +54,10 @@ class CellsGenerator(keras.utils.Sequence):
 
         pad_size = 8
 
+        ##FIXME the overwriting of x_paths is for the overfitting experiment
+        x_paths = ["data/maddox/images/x.014.png"]
+        y_paths = ["data/maddox/masks/x.014.png"]
+
         for idx, x_path in enumerate(x_paths):
             baz = load_img(x_path, target_size=(self.image_size, self.image_size))
             x = np.array(img_to_array(baz), dtype="float32")
@@ -64,6 +71,7 @@ class CellsGenerator(keras.utils.Sequence):
             n_row = x.shape[1] // (patch_size + 2 * pad_size)
             n_col = x.shape[0] // (patch_size + 2 * pad_size)
 
+            print(n_row, n_col)
             # Extract patches over image
             for i in range(n_row):
                 for j in range(n_col):
@@ -88,6 +96,13 @@ class CellsGenerator(keras.utils.Sequence):
                     self.x_paths.append(x_paths[idx])
                     self.y_paths.append(y_paths[idx])
 
+
+        #FIXME this code will not be necessary once debugging is done
+        #Write x_patches[0] and y_patches[0]
+        # Visualize input image and ground-truth output
+        print(x_patches[0].shape, color.label2rgb(y_patches[0], bg_label=0).shape)
+        io.imsave(f"TMP_x.png", x_patches[0])
+        io.imsave(f"TMP_y.png", color.label2rgb(y_patches[0], bg_label=0)[:, :, 0, :])
 
         return x_patches, y_patches
 
@@ -119,16 +134,24 @@ class CellsGenerator(keras.utils.Sequence):
     def __getitem__(self, batch_idx):
         """Return (input, target) numpy array corresponding to batch idx"""
 
+
         x_patches = self.x_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
         y_patches = self.y_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
+
+        #FIXME Warning! Uncomment the following. This is for an experimentw here you force the network to overfit.
+        x_patches = self.x_patches[0:1] #Independent of batch index
+        y_patches = self.y_patches[0:1]
 
         x_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, 3), dtype="float32") #Input images are RGB
         y_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, 1), dtype="uint8")
 
+        #FIXME Warning! Re-enable augmentation of dataset
         #Go through each patch in batch and augment it
         for i in range(len(x_patches)):
             x_batch[i], y_batch[i] = self.augment((x_patches[i], y_patches[i])) #Place augmented patch in batch
 
+        io.imsave(f"TMP2_x.png", x_batch[0])
+        io.imsave(f"TMP2_y.png", color.label2rgb(y_batch[0], bg_label=0)[:, :, 0, :])
 
         return x_batch, y_batch
 

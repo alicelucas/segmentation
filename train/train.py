@@ -34,14 +34,7 @@ def train_unet(config):
     image_size = config["image_size"]
 
     training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, image_size)
-    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, image_size )
-
-    # ##TEMPORARY DEBUG
-    # x_batch, y_batch = training_generator.__getitem__(4)
-    # # Visualize input image and ground-truth output
-    # io.imsave(f"./images/x_patch.png", x_batch[1])
-    # io.imsave(f"./images/y_patch.png", color.label2rgb(y_batch[1][:, :, 0]))
-    # ##END OF TEMPORARY DEBUG
+    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, image_size)
 
     unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),

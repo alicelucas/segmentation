@@ -1,19 +1,23 @@
-train: True
-test_filepath: data/maddox/images/x.011.png
-use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
+train: False
 
-train_image_dir: data/maddox/images
-train_mask_dir: data/maddox/masks
 save_dir: .
 
 input_size: 224
-image_size: 1024
-pad_size: 8
+image_size: 224 #1024 #224 #1024
 
+#Testing config
+pad_size: 0 #8
+test_filepath: ./TMP2_x.png #data/maddox/images/x.011.png
+use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
+
+
+#Training config
+train_image_dir: data/maddox/images
+train_mask_dir: data/maddox/masks
 augmentation: False
-validation_percentage: 0.75
-lr: 0.01
+validation_percentage: 0.75 # 0.2
+lr: 0.5
 batch_size: 1
-epochs: 1
+epochs: 100
 optimizer: Adam
 saved_model_name: unet.h5

@@ -31,18 +31,20 @@ def train_unet(config):
     batch_size = config["batch_size"]
 
     patch_size = config["input_size"]
-    image_size = config["image_size"]
+    image_size = config["image_size"] #FIXME: image_size should be determined from the dataset we read, not the config file
 
     should_augment = config["augmentation"]
 
     training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, image_size, should_augment)
     validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, image_size, should_augment)
 
-    print("Number of train examples", training_generator.__len__())
-    print(training_generator.x_paths)
+    # unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
+    #               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    #               metrics=['accuracy'])
 
-    unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    #FIXME: go back to using Adam or RMSProp
+    unet.compile(optimizer=tf.keras.optimizers.SGD(lr=base_learning_rate),
+                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
     unet.fit(training_generator, epochs=epochs,

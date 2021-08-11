@@ -38,7 +38,13 @@ class CellsGenerator(keras.utils.Sequence):
 
 
     def __len__(self):
-        return len(self.x_patches) // self.batch_size
+        """
+        Returns number of batches
+        :return:
+        """
+        #FIXEME
+        return 1
+        # return len(self.x_patches) // self.batch_size
 
 
     def create_patches(self, x_paths, y_paths):
@@ -146,8 +152,8 @@ class CellsGenerator(keras.utils.Sequence):
         for i in range(len(x_patches)):
             x_batch[i], y_batch[i] = x_patches[i], y_patches[i] #Place augmented patch in batch
 
-        io.imsave(f"TMP2_x.png", x_batch[0])
-        io.imsave(f"TMP2_y.png", color.label2rgb(y_batch[0], bg_label=0)[:, :, 0, :])
+        # io.imsave(f"TMP2_x.png", x_batch[0])
+        # io.imsave(f"TMP2_y.png", color.label2rgb(y_batch[0], bg_label=0)[:, :, 0, :])
 
         return x_batch, y_batch
 

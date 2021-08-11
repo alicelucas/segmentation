@@ -27,7 +27,8 @@ def unet_model():
     # Create the feature extraction model
     down_stack = tf.keras.Model(inputs=base_model.input, outputs=base_model_outputs)
 
-    down_stack.trainable = False
+    #FIXME:should you set this to False?
+    down_stack.trainable = True
 
     #The decoder/upsampler is simply a series of upsample blocks implemented in TensorFlow examples.
     up_stack = [
@@ -40,7 +41,9 @@ def unet_model():
     inputs = tf.keras.layers.Input(shape=[224, 224, 3])
 
     #Use mobile net's way of input input
-    normalized = tf.keras.applications.mobilenet_v2.preprocess_input(inputs) #Use mobilenet's input (maps to [-1, 1] range)
+    #FIXME Maybe bring this back in
+    # normalized = tf.keras.applications.mobilenet_v2.preprocess_input(inputs) #Use mobilenet's input (maps to [-1, 1] range)
+    normalized = inputs
 
     # Downsampling through the model
     skips = down_stack(normalized)

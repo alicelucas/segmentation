@@ -33,32 +33,44 @@ def test_unet(config):
     nindex = filename.rfind(".")
     filenumber = filename[nindex-3:nindex]
 
+
     # Get list of input files and target mask
     # Here we assume directory structue is name/masks/*.png and name/images/*.png
     slash = image_dir.rfind("/")
     target_dir = join(image_dir[:slash], "masks")
 
-    x_image = Image.open(join(image_dir, filename))
-    x_grey = numpy.asarray(x_image, dtype="float32")
-    x = numpy.stack((x_grey,) * 3, axis=-1)
+    # x_image = Image.open(join(image_dir, filename))
+    x_image = Image.open(filepath)
+    x = numpy.asarray(x_image, dtype="float32")
 
-    y_image = Image.open(join(target_dir, filename))
-    y_pre = numpy.asarray(y_image, dtype="uint8")
-    y = preprocessing.convert_labels(y_pre)
+    if x.shape[2] == 1:
+        x = numpy.stack((x,) * 3, axis=-1)
 
-    save_dir = config["save_dir"]
-    if not exists(save_dir):
-        makedirs(save_dir)
+    #FIXME Uncomment this when you are done with your overfitting experiment
 
-    # Visualize input image and ground-truth output
-    io.imsave(f"{save_dir}/{filename}", x[:, :, 0])
-    io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y, bg_label=0))
+    #
+    # y_image = Image.open(join(target_dir, filename))
+    # y_pre = numpy.asarray(y_image, dtype="uint8")
+    # y = preprocessing.convert_labels(y_pre)
+    #
+    # save_dir = config["save_dir"]
+    # if not exists(save_dir):
+    #     makedirs(save_dir)
+    #
+    # # Visualize input image and ground-truth output
+    # io.imsave(f"{save_dir}/{filename}", x[:, :, 0])
+    # io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y, bg_label=0))
 
     # Make inference pass
     pretrained = config["use_saved_model"] #If we want to make a prediction using an already trained model (trained by us)
     probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, pad_size, num_classes, pretrained=pretrained)
 
     print(probs.shape)
+
+    #FIXME : Comment this when done with overfitting experiment (Save dir is defined above)
+    save_dir = config["save_dir"]
+    if not exists(save_dir):
+        makedirs(save_dir)
 
 
     # Convert whole probability map to color mask for each example in image
@@ -86,14 +98,16 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
     patch_size = input_size - 2 * pad_size  # account for padding
 
     # number of patches in row and column directions
-    n_row = x.shape[2] // patch_size
-    n_col = x.shape[1] // patch_size
+    n_row = (x.shape[2] // patch_size) - 1
+    n_col = (x.shape[1] // patch_size) - 1
 
     # pad whole image so that we can account for border effects
     pad_row = int(numpy.floor((n_row + 1) * patch_size - x.shape[2]) / 2)
     pad_col = int(numpy.floor((n_col + 1) * patch_size - x.shape[1]) / 2)
 
     im = numpy.pad(x, ((0, 0), (pad_col, pad_col), (pad_row, pad_row), (0, 0)))
+
+    print("Image shape:", im.shape)
 
     probs = numpy.zeros((1, (n_col + 1) * patch_size, (n_row + 1) * patch_size,
                          num_classes))  # Probability map for the whole image
@@ -104,8 +118,9 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
         for j in range(n_col + 1):
             patch = im[:, patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1),
                     :]  # extract patch
-            patch = numpy.pad(patch, ((0, 0), (8, 8), (8, 8), (0, 0)))  # add padding
+            patch = numpy.pad(patch, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
             patch_prob = unet.predict(patch)  # forward pass
+            print("Patch prob", patch_prob.shape)
             probs[:, patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1), :] = patch_prob[:,
                                                                                                     pad_size: input_size - pad_size,
                                                                                                     pad_size: input_size - pad_size,
@@ -113,6 +128,6 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
 
 
     # Crop probability mask to original image size
-    probs = probs[:, pad_col:-pad_col, pad_row:-pad_row, :]
+    probs = probs[:, pad_col:-pad_col-1, pad_row:-pad_row-1, :]
 
     return probs

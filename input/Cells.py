@@ -150,10 +150,11 @@ class CellsGenerator(keras.utils.Sequence):
 
         #Go through each patch in batch and augment it
         for i in range(len(x_patches)):
-            x_batch[i], y_batch[i] = x_patches[i], y_patches[i] #Place augmented patch in batch
+            x_batch[i], y_batch[i] = x_patches[i], y_patches[i]
 
         # io.imsave(f"TMP2_x.png", x_batch[0])
-        # io.imsave(f"TMP2_y.png", color.label2rgb(y_batch[0], bg_label=0)[:, :, 0, :])
+        # io.imsave(f"TMP2_y.png", color.label2rgb(y_batch[0, :, :, 0], bg_label=0))
+
 
         return x_batch, y_batch
 

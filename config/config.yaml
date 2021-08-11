@@ -7,7 +7,7 @@ image_size: 224 #1024 #224 #1024
 
 #Testing config
 pad_size: 0 #8
-test_filepath: ./TMP2_x.png #data/maddox/images/x.011.png
+test_filepath: TMP2_x.png  #data/maddox/images/x.018.png
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
 
 
@@ -16,8 +16,8 @@ train_image_dir: data/maddox/images
 train_mask_dir: data/maddox/masks
 augmentation: False
 validation_percentage: 0.75 # 0.2
-lr: 0.5
+lr: 0.025
 batch_size: 1
-epochs: 100
+epochs: 500
 optimizer: Adam
 saved_model_name: unet.h5

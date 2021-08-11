@@ -13,6 +13,7 @@ def train_unet(config):
     :param config: config file
     """
     unet = model.unet_model()
+    unet.summary()
 
     base_learning_rate = config["lr"]
     epochs = config["epochs"]

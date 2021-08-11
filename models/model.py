@@ -63,5 +63,6 @@ def unet_model():
 
     x = last(x)
 
+    outputs = tf.keras.layers.Conv2D(3, 1, padding="same", activation="sigmoid")(x)
 
-    return tf.keras.Model(inputs=inputs, outputs=x)
+    return tf.keras.Model(inputs=inputs, outputs=outputs)

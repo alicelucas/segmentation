@@ -43,7 +43,7 @@ def test_unet(config):
     x_image = Image.open(filepath)
     x = numpy.asarray(x_image, dtype="float32")
 
-    if x.shape[2] == 1:
+    if len(x.shape) == 2:
         x = numpy.stack((x,) * 3, axis=-1)
 
     #FIXME Uncomment this when you are done with your overfitting experiment
@@ -98,12 +98,14 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
     patch_size = input_size - 2 * pad_size  # account for padding
 
     # number of patches in row and column directions
-    n_row = (x.shape[2] // patch_size) - 1
-    n_col = (x.shape[1] // patch_size) - 1
+    n_row = (x.shape[2] // patch_size)
+    n_col = (x.shape[1] // patch_size)
 
     # pad whole image so that we can account for border effects
     pad_row = int(numpy.floor((n_row + 1) * patch_size - x.shape[2]) / 2)
     pad_col = int(numpy.floor((n_col + 1) * patch_size - x.shape[1]) / 2)
+
+    print(n_row, n_col, pad_row, pad_col)
 
     im = numpy.pad(x, ((0, 0), (pad_col, pad_col), (pad_row, pad_row), (0, 0)))
 

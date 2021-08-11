@@ -28,7 +28,7 @@ def unet_model():
     down_stack = tf.keras.Model(inputs=base_model.input, outputs=base_model_outputs)
 
     #FIXME:should you set this to False?
-    down_stack.trainable = True
+    down_stack.trainable = False
 
     #The decoder/upsampler is simply a series of upsample blocks implemented in TensorFlow examples.
     up_stack = [
@@ -43,7 +43,7 @@ def unet_model():
     #Use mobile net's way of input input
     #FIXME Maybe bring this back in
     # normalized = tf.keras.applications.mobilenet_v2.preprocess_input(inputs) #Use mobilenet's input (maps to [-1, 1] range)
-    normalized = inputs
+    normalized = inputs #TODO: this has a huge impact on the training, figure out why
 
     # Downsampling through the model
     skips = down_stack(normalized)

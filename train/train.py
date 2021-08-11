@@ -39,14 +39,14 @@ def train_unet(config):
     training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, image_size, should_augment)
     validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, image_size, should_augment)
 
-    # unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
-    #               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    #               metrics=['accuracy'])
+    unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
 
     #FIXME: go back to using Adam or RMSProp
-    unet.compile(optimizer=tf.keras.optimizers.SGD(lr=base_learning_rate),
-                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                  metrics=['accuracy'])
+    # unet.compile(optimizer=tf.keras.optimizers.SGD(lr=base_learning_rate),
+    #              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    #               metrics=['accuracy'])
 
     unet.fit(training_generator, epochs=epochs,
                         validation_data=validation_generator)

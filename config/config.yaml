@@ -3,7 +3,7 @@ train: False
 save_dir: .
 
 input_size: 224
-image_size: 224 #1024 #224 #1024
+image_size: 224 #1024 #224 #1024 #FIXME we shouldnt be asking for this
 
 #Testing config
 pad_size: 0 #8
@@ -16,8 +16,8 @@ train_image_dir: data/maddox/images
 train_mask_dir: data/maddox/masks
 augmentation: False
 validation_percentage: 0.75 # 0.2
-lr: 0.025
+lr: 0.005 #0.1 best for SGD
 batch_size: 1
-epochs: 500
-optimizer: Adam
+epochs: 100
+optimizer: Adam #FIXME this is not used by your code
 saved_model_name: unet.h5

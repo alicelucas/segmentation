@@ -1,6 +1,25 @@
 import tensorflow as tf
-from tensorflow_examples.models.pix2pix import pix2pix
 
+
+def upsample(filters, size, apply_dropout=False):
+  initializer = tf.random_normal_initializer(0., 0.02)
+
+  result = tf.keras.Sequential()
+  result.add(
+    tf.keras.layers.Conv2DTranspose(filters, size, strides=2,
+                                    padding='same',
+                                    kernel_initializer=initializer,
+                                    use_bias=False))
+
+    #TODO experiment with leaving the batch normalization in vs not
+  # result.add(tf.keras.layers.BatchNormalization())
+
+  if apply_dropout:
+      result.add(tf.keras.layers.Dropout(0.5))
+
+  result.add(tf.keras.layers.ReLU())
+
+  return result
 
 def unet_model(input_shape):
     """
@@ -30,12 +49,13 @@ def unet_model(input_shape):
     #FIXME:should you set this to False?
     down_stack.trainable = False
 
+
     #The decoder/upsampler is simply a series of upsample blocks implemented in TensorFlow examples.
     up_stack = [
-        pix2pix.upsample(512, 3),  # 7x7 -> 14x14
-        pix2pix.upsample(256, 3),  # 14x14 -> 28x28
-        pix2pix.upsample(128, 3),  # 28x28 -> 56x56
-        pix2pix.upsample(64, 3),  # 56x56 -> 112x112
+        upsample(512, 3),  # 7x7 -> 14x14
+        upsample(256, 3),  # 14x14 -> 28x28
+        upsample(128, 3),  # 28x28 -> 56x56
+        upsample(64, 3),  # 56x56 -> 112x112
     ]
 
     inputs = tf.keras.layers.Input(shape=[224, 224, 3])

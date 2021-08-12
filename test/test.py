@@ -95,33 +95,41 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
     n_row = (x.shape[2] // input_size)
     n_col = (x.shape[1] // input_size)
 
-    im = numpy.pad(x, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))
+    # im = numpy.pad(x, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))
 
-    print("Image shape:", im.shape)
-
+    print("Image shape:", x.shape)
 
     # Initialize model
     if pretrained:
         unet = models.load_model('./unet.h5')
     else:
-        unet = model.unet_model(numpy.array([im.shape[1], im.shape[2], im.shape[3]]))
+        unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]))
 
-    probs = numpy.zeros((1, n_col * input_size, n_row * input_size,
+    probs = numpy.zeros((1, x.shape[1] - 2 * pad_size, x.shape[2] - 2*pad_size,
                          num_classes))  # Probability map for the whole image
 
-    # Extract patches over image
-    #FIXME this needs to be changed for when you iterate over a whole iamge
-    for i in range(n_row):
-        print(f"Prediction row {i} out of {n_row} rows.")
-        for j in range(n_col):
-            patch = im[:, pad_size + input_size * i:input_size * (i + 1) - pad_size, pad_size + input_size * j:input_size * (j + 1) - pad_size,
-                    :]  # extract center patch
-            patch = numpy.pad(patch, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
-            patch_prob = unet.predict(patch)  # forward pass
-            print("Patch prob", patch_prob.shape)
-            probs[:, patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1), :] = patch_prob[:,
-                                                                                                    pad_size: input_size - pad_size,
-                                                                                                    pad_size: input_size - pad_size,
-                                                                                                    :]
+    # Extract patches over image since MobileNet expects 224x224 input
+    start = 0 #Beginning index
+    end = input_size #End index
+
+    #Iterate over image and send patches individually to MobileNet
+    while start < x.shape[2] - 2 * pad_size:
+        patch = x[:, start: end, start: end, :]  # extract patch
+        patch_prob = unet.predict(patch)  # forward pass
+        probs[:, :, :, :] = patch_prob[:, pad_size: input_size - pad_size, pad_size: input_size - pad_size,:]
+        start += input_size - 2 * pad_size
+
+    # for i in range(n_row):
+    #     print(f"Prediction row {i} out of {n_row} rows.")
+    #     for j in range(n_col):
+    #         patch = im[:, pad_size + input_size * i:input_size * (i + 1) - pad_size, pad_size + input_size * j:input_size * (j + 1) - pad_size,
+    #                 :]  # extract center patch
+    #         patch = numpy.pad(patch, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
+    #         patch_prob = unet.predict(patch)  # forward pass
+    #         print("Patch prob", patch_prob.shape)
+    #         probs[:, patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1), :] = patch_prob[:,
+    #                                                                                                 pad_size: input_size - pad_size,
+    #                                                                                                 pad_size: input_size - pad_size,
+    #                                                                                                 :]
 
     return probs

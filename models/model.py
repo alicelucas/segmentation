@@ -61,9 +61,7 @@ def unet_model(input_shape):
     inputs = tf.keras.layers.Input(shape=[224, 224, 3])
 
     #Use mobile net's way of input input
-    #FIXME Maybe bring this back in
     normalized = tf.keras.applications.mobilenet_v2.preprocess_input(inputs) #Use mobilenet's input (maps to [-1, 1] range)
-    # normalized = inputs #TODO: this has a huge impact on the training, figure out why
 
     # Downsampling through the model
     skips = down_stack(normalized)
@@ -75,10 +73,6 @@ def unet_model(input_shape):
         x = up(x)
         concat = tf.keras.layers.Concatenate()
         x = concat([x, skip])
-
-    x = tf.keras.layers.Conv2D(64, 3, padding="same")(x)
-    x = tf.keras.layers.Conv2D(64, 3, padding="same")(x)
-    x = tf.keras.layers.Conv2D(64, 3, padding="same")(x)
 
     # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(

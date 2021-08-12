@@ -106,11 +106,11 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
     else:
         unet = model.unet_model(numpy.array([im.shape[1], im.shape[2], im.shape[3]]))
 
-
     probs = numpy.zeros((1, n_col * input_size, n_row * input_size,
                          num_classes))  # Probability map for the whole image
 
     # Extract patches over image
+    #FIXME this needs to be changed for when you iterate over a whole iamge
     for i in range(n_row):
         print(f"Prediction row {i} out of {n_row} rows.")
         for j in range(n_col):
@@ -123,6 +123,5 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
                                                                                                     pad_size: input_size - pad_size,
                                                                                                     pad_size: input_size - pad_size,
                                                                                                     :]
-
 
     return probs

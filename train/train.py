@@ -48,11 +48,6 @@ def train_unet(config):
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    #FIXME: go back to using Adam or RMSProp
-    # unet.compile(optimizer=tf.keras.optimizers.SGD(lr=base_learning_rate),
-    #              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    #               metrics=['accuracy'])
-
     unet.fit(training_generator, epochs=epochs,
                         validation_data=validation_generator)
 

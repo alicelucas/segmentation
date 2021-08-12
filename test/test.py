@@ -88,15 +88,6 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
     :param pretrained: if False, then we use the random head decoder. If true, we use the unet.h5 weights that have been saved to home
     :return: The probability map of the size of the input image
     """
-    # Code below prepares patch extraction process for inference when testing
-    patch_size = input_size - 2 * pad_size  # account for padding
-
-    # number of patches in row and column directions
-    n_row = (x.shape[2] // input_size)
-    n_col = (x.shape[1] // input_size)
-
-    # im = numpy.pad(x, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))
-
     print("Image shape:", x.shape)
 
     # Initialize model
@@ -109,27 +100,35 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
                          num_classes))  # Probability map for the whole image
 
     # Extract patches over image since MobileNet expects 224x224 input
-    start = 0 #Beginning index
-    end = input_size #End index
+    start_row, start_col = 0 , 0 #Start index
+    end_row, end_col = input_size, input_size #End index
+    overflow_row, overflow_col = 0, 0
 
     #Iterate over image and send patches individually to MobileNet
-    while start < x.shape[2] - 2 * pad_size:
-        patch = x[:, start: end, start: end, :]  # extract patch
-        patch_prob = unet.predict(patch)  # forward pass
-        probs[:, :, :, :] = patch_prob[:, pad_size: input_size - pad_size, pad_size: input_size - pad_size,:]
-        start += input_size - 2 * pad_size
+    while start_row < x.shape[1] - 2 * pad_size:
+        overflow_col = 0
+        start_col = 0
+        end_col = input_size
+        while start_col < x.shape[2] - 2 * pad_size:
+            #Pad if we are outside of boundary of image
+            if end_col > x.shape[2] and end_row < x.shape[1]:
+                overflow_col = end_col - x.shape[2]
+                patch = numpy.pad(x[:, start_row: end_row, start_col: x.shape[2], :], ((0, 0), (0, 0), (0, overflow_col), (0, 0)))
+            elif end_row > x.shape[1] and end_col < x.shape[2]:
+                overflow_row = end_row - x.shape[1]
+                patch = numpy.pad(x[:, start_row: x.shape[1], start_col: end_col, :], ((0, 0), (0, overflow_row), (0, 0), (0, 0)))
+            elif end_row > x.shape[1] and end_col > x.shape[2]:
+                overflow_row = end_row - x.shape[1]
+                overflow_col = end_col - x.shape[2]
+                patch = numpy.pad(x[:, start_row: x.shape[1], start_col: x.shape[2], :], ((0, 0), (0, overflow_row), (0, overflow_col), (0, 0)))
+            else:
+                patch = x[:, start_row: end_row, start_col: end_col, :]  # extract patch
 
-    # for i in range(n_row):
-    #     print(f"Prediction row {i} out of {n_row} rows.")
-    #     for j in range(n_col):
-    #         patch = im[:, pad_size + input_size * i:input_size * (i + 1) - pad_size, pad_size + input_size * j:input_size * (j + 1) - pad_size,
-    #                 :]  # extract center patch
-    #         patch = numpy.pad(patch, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
-    #         patch_prob = unet.predict(patch)  # forward pass
-    #         print("Patch prob", patch_prob.shape)
-    #         probs[:, patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1), :] = patch_prob[:,
-    #                                                                                                 pad_size: input_size - pad_size,
-    #                                                                                                 pad_size: input_size - pad_size,
-    #                                                                                                 :]
+            patch_prob = unet.predict(patch)  # forward pass
+            probs[:, start_row:end_row - 2 * pad_size, start_col:end_col - 2 * pad_size, :] = patch_prob[:, pad_size: input_size - pad_size - overflow_row, pad_size: input_size - pad_size - overflow_col,:] #Crop to get rid of border effects
+            start_col += input_size - 2 * pad_size
+            end_col = start_col + input_size
+        start_row += input_size - 2 * pad_size
+        end_row = start_row + input_size
 
     return probs

@@ -6,7 +6,7 @@ input_size: 224
 
 #Testing config
 pad_size: 4 #8
-test_filepath: TMP2_x.png  #data/maddox/images/x.018.png
+test_filepath: TMP2_x.png # #data/maddox/images/x.018.png
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
 
 #Training config

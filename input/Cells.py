@@ -54,9 +54,7 @@ class CellsGenerator(keras.utils.Sequence):
         :param y_paths: list of paths of label masks
         :return: list of patches of size 224 x 224
         """
-        # Code below prepares patch extraction process for inference when testing
-        patch_size = self.patch_size - 2 * self.pad_size  # account for padding
-
+        # Code below prepares patch extraction process for extracting patches from image
         x_patches = []
         y_patches = []
 

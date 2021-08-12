@@ -76,6 +76,10 @@ def unet_model(input_shape):
         concat = tf.keras.layers.Concatenate()
         x = concat([x, skip])
 
+    x = tf.keras.layers.Conv2D(64, 3, padding="same")(x)
+    x = tf.keras.layers.Conv2D(64, 3, padding="same")(x)
+    x = tf.keras.layers.Conv2D(64, 3, padding="same")(x)
+
     # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(
       output_channels, 3, strides=2,

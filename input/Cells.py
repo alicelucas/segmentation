@@ -64,16 +64,12 @@ class CellsGenerator(keras.utils.Sequence):
         x_paths = ["data/maddox/images/x.018.png"]
         y_paths = ["data/maddox/masks/x.018.png"]
 
-        # Extract image shape by reading shape of first image
-        x_image = Image.open(x_paths[0])
-        image_rows = np.asarray(x_image, dtype="float32").shape[0]
-        image_cols = np.asarray(x_image, dtype="float32").shape[1]
 
         for idx, x_path in enumerate(x_paths):
-            baz = load_img(x_path, target_size=(image_rows, image_cols))
+            baz = load_img(x_path, color_mode="rgb")
             x = np.array(img_to_array(baz), dtype="float32")
 
-            foo = load_img(y_paths[idx], target_size=(image_rows, image_cols))
+            foo = load_img(y_paths[idx], color_mode="rgb")
             data = np.array([img_to_array(foo)], dtype="uint8")
             mask = preprocessing.convert_labels(data[0])
 

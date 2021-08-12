@@ -1,25 +1,24 @@
 import random
 
 import numpy as np
+from PIL import Image
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
 from utils import preprocessing
 
-from skimage import io, color
 
 class CellsGenerator(keras.utils.Sequence):
     """
     Helper class to iterate over the input (from file paths to numpy arrays)
     """
 
-    def __init__(self, x_paths, y_paths, batch_size, patch_size, image_size, should_augment):
+    def __init__(self, x_paths, y_paths, batch_size, patch_size, should_augment):
         self.do_augment = should_augment
 
         self.batch_size = batch_size
         self.patch_size = patch_size
 
-        self.image_size = image_size
         self.pad_size = 8
 
         self.x_paths = []
@@ -65,11 +64,16 @@ class CellsGenerator(keras.utils.Sequence):
         x_paths = ["data/maddox/images/x.018.png"]
         y_paths = ["data/maddox/masks/x.018.png"]
 
+        # Extract image shape by reading shape of first image
+        x_image = Image.open(x_paths[0])
+        image_rows = np.asarray(x_image, dtype="float32").shape[0]
+        image_cols = np.asarray(x_image, dtype="float32").shape[1]
+
         for idx, x_path in enumerate(x_paths):
-            baz = load_img(x_path, target_size=(self.image_size, self.image_size))
+            baz = load_img(x_path, target_size=(image_rows, image_cols))
             x = np.array(img_to_array(baz), dtype="float32")
 
-            foo = load_img(y_paths[idx], target_size=(self.image_size, self.image_size))
+            foo = load_img(y_paths[idx], target_size=(image_rows, image_cols))
             data = np.array([img_to_array(foo)], dtype="uint8")
             mask = preprocessing.convert_labels(data[0])
 

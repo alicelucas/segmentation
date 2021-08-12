@@ -1,9 +1,8 @@
-train: False
+train: True
 
 save_dir: .
 
 input_size: 224
-image_size: 224 #1024 #224 #1024 #FIXME we shouldnt be asking for this
 
 #Testing config
 pad_size: 0 #8

@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow_examples.models.pix2pix import pix2pix
 
 
-def unet_model():
+def unet_model(input_shape):
     """
     Simple segmentation from tensorflow tutorial: https://github.com/tensorflow/docs/blob/master/site/en/tutorials/images/segmentation.ipynb
     It's a Unet model with MobileVnet as encoder backbone
@@ -11,16 +11,16 @@ def unet_model():
     output_channels = 3
 
     #Instantiate model using stored weights
-    base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape=[224, 224, 3], include_top=False,
+    base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape=input_shape, include_top=False,
                                                                 weights="./weights/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_1.0_128_no_top.h5") #Instantiate architecture
 
     # Use the activations of these layers
     layer_names = [
-        'block_1_expand_relu',   # 64x64
-        'block_3_expand_relu',   # 32x32
-        'block_6_expand_relu',   # 16x16
-        'block_13_expand_relu',  # 8x8
-        'block_16_project',      # 4x4
+        'block_1_expand_relu',   # 112x112
+        'block_3_expand_relu',   # 56x56
+        'block_6_expand_relu',   # 28x28
+        'block_13_expand_relu',  # 14x14
+        'block_16_project',      # 7x7
     ]
     base_model_outputs = [base_model.get_layer(name).output for name in layer_names]
 
@@ -32,10 +32,10 @@ def unet_model():
 
     #The decoder/upsampler is simply a series of upsample blocks implemented in TensorFlow examples.
     up_stack = [
-        pix2pix.upsample(512, 3),  # 4x4 -> 8x8
-        pix2pix.upsample(256, 3),  # 8x8 -> 16x16
-        pix2pix.upsample(128, 3),  # 16x16 -> 32x32
-        pix2pix.upsample(64, 3),  # 32x32 -> 64x64
+        pix2pix.upsample(512, 3),  # 7x7 -> 14x14
+        pix2pix.upsample(256, 3),  # 14x14 -> 28x28
+        pix2pix.upsample(128, 3),  # 28x28 -> 56x56
+        pix2pix.upsample(64, 3),  # 56x56 -> 112x112
     ]
 
     inputs = tf.keras.layers.Input(shape=[224, 224, 3])
@@ -59,7 +59,7 @@ def unet_model():
     # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(
       output_channels, 3, strides=2,
-      padding='same')  #64x64 -> 128x128
+      padding='same')  #112x112 -> 224x224
 
     x = last(x)
 

@@ -7,19 +7,21 @@ from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
 from utils import preprocessing
 
+from skimage import io, color
+
 
 class CellsGenerator(keras.utils.Sequence):
     """
     Helper class to iterate over the input (from file paths to numpy arrays)
     """
 
-    def __init__(self, x_paths, y_paths, batch_size, patch_size, should_augment):
+    def __init__(self, x_paths, y_paths, batch_size, patch_size, pad_size, should_augment):
         self.do_augment = should_augment
 
         self.batch_size = batch_size
         self.patch_size = patch_size
 
-        self.pad_size = 8
+        self.pad_size = pad_size
 
         self.x_paths = []
         self.y_paths = []
@@ -58,7 +60,7 @@ class CellsGenerator(keras.utils.Sequence):
         x_patches = []
         y_patches = []
 
-        pad_size = 8
+        pad_size = self.pad_size
 
         ##FIXME the overwriting of x_paths is for the overfitting experiment
         x_paths = ["data/maddox/images/x.018.png"]
@@ -79,17 +81,16 @@ class CellsGenerator(keras.utils.Sequence):
                 x, y = self.augment((x, y))  # Place augmented patch in batch
 
             # number of column directions
-            n_row = x.shape[1] // (patch_size + 2 * pad_size)
-            n_col = x.shape[0] // (patch_size + 2 * pad_size)
+            n_row = x.shape[1] // self.patch_size
+            n_col = x.shape[0] // self.patch_size
 
-            print(n_row, n_col)
             # Extract patches over image
             for i in range(n_row):
                 for j in range(n_col):
 
                     #Extract y-patch
-                    patch = y[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1),
-                            :]  # extract patch
+                    patch = y[pad_size + self.patch_size * i:self.patch_size * (i + 1) - pad_size, pad_size + self.patch_size * j:self.patch_size * (j + 1) - pad_size,
+                            :]  # extract center patch
 
                     #Only keep the patch if it has non-zero labels (i.e., not just black)
                     if 1 not in patch[:, :, 0]:
@@ -99,7 +100,8 @@ class CellsGenerator(keras.utils.Sequence):
                     y_patches.append(patch)
 
                     # Extract x-patch
-                    patch = x[patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1), :]  #extract patch
+                    patch = x[pad_size + self.patch_size * i:self.patch_size * (i + 1) - pad_size, pad_size + self.patch_size * j:self.patch_size * (j + 1) - pad_size,
+                            :]  #extract center patch
                     patch = np.pad(patch, ((pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
                     x_patches.append(patch)
 

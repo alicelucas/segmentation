@@ -15,10 +15,10 @@ def train_unet(config):
     :param config: config file
     """
 
-    unet = model.unet_model()
-    unet.summary()
+    input_size = config["input_size"]
 
-    # exit(0)
+    unet = model.unet_model([input_size, input_size, 3]) #Assume training with 224 x 224 patches
+    unet.summary()
 
     base_learning_rate = config["lr"]
     epochs = config["epochs"]
@@ -37,11 +37,12 @@ def train_unet(config):
     batch_size = config["batch_size"]
 
     patch_size = config["input_size"]
+    pad_size = config["pad_size"]
 
     should_augment = config["augmentation"]
 
-    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, should_augment)
-    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, should_augment)
+    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, pad_size, should_augment)
+    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, pad_size, should_augment)
 
     unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),

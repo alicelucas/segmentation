@@ -1,14 +1,13 @@
-train: True
+train: False
 
 save_dir: .
 
 input_size: 224
 
 #Testing config
-pad_size: 0 #8
+pad_size: 4 #8
 test_filepath: TMP2_x.png  #data/maddox/images/x.018.png
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
-
 
 #Training config
 train_image_dir: data/maddox/images
@@ -20,3 +19,5 @@ batch_size: 1
 epochs: 100
 optimizer: Adam #FIXME this is not used by your code
 saved_model_name: unet.h5
+#FIXME bring back should_augment
+

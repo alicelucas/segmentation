@@ -88,38 +88,34 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
     :param pretrained: if False, then we use the random head decoder. If true, we use the unet.h5 weights that have been saved to home
     :return: The probability map of the size of the input image
     """
-    # Initialize model
-    if pretrained:
-        unet = models.load_model('./unet.h5')
-    else:
-        unet = model.unet_model()
-
     # Code below prepares patch extraction process for inference when testing
     patch_size = input_size - 2 * pad_size  # account for padding
 
     # number of patches in row and column directions
-    n_row = (x.shape[2] // patch_size)
-    n_col = (x.shape[1] // patch_size)
+    n_row = (x.shape[2] // input_size)
+    n_col = (x.shape[1] // input_size)
 
-    # pad whole image so that we can account for border effects
-    pad_row = int(numpy.floor((n_row + 1) * patch_size - x.shape[2]) / 2)
-    pad_col = int(numpy.floor((n_col + 1) * patch_size - x.shape[1]) / 2)
-
-    print(n_row, n_col, pad_row, pad_col)
-
-    im = numpy.pad(x, ((0, 0), (pad_col, pad_col), (pad_row, pad_row), (0, 0)))
+    im = numpy.pad(x, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))
 
     print("Image shape:", im.shape)
 
-    probs = numpy.zeros((1, (n_col + 1) * patch_size, (n_row + 1) * patch_size,
+
+    # Initialize model
+    if pretrained:
+        unet = models.load_model('./unet.h5')
+    else:
+        unet = model.unet_model(numpy.array([im.shape[1], im.shape[2], im.shape[3]]))
+
+
+    probs = numpy.zeros((1, n_col * input_size, n_row * input_size,
                          num_classes))  # Probability map for the whole image
 
     # Extract patches over image
-    for i in range(n_row + 1):
+    for i in range(n_row):
         print(f"Prediction row {i} out of {n_row} rows.")
-        for j in range(n_col + 1):
-            patch = im[:, patch_size * i:patch_size * (i + 1), patch_size * j:patch_size * (j + 1),
-                    :]  # extract patch
+        for j in range(n_col):
+            patch = im[:, pad_size + input_size * i:input_size * (i + 1) - pad_size, pad_size + input_size * j:input_size * (j + 1) - pad_size,
+                    :]  # extract center patch
             patch = numpy.pad(patch, ((0, 0), (pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
             patch_prob = unet.predict(patch)  # forward pass
             print("Patch prob", patch_prob.shape)
@@ -128,8 +124,5 @@ def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
                                                                                                     pad_size: input_size - pad_size,
                                                                                                     :]
 
-
-    # Crop probability mask to original image size
-    probs = probs[:, pad_col:-pad_col-1, pad_row:-pad_row-1, :]
 
     return probs

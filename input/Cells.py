@@ -43,9 +43,7 @@ class CellsGenerator(keras.utils.Sequence):
         Returns number of batches
         :return:
         """
-        #FIXEME
-        return 1
-        # return len(self.x_patches) // self.batch_size
+        return len(self.x_patches) // self.batch_size
 
 
     def create_patches(self, x_paths, y_paths):
@@ -59,11 +57,6 @@ class CellsGenerator(keras.utils.Sequence):
         y_patches = []
 
         pad_size = self.pad_size
-
-        ##FIXME the overwriting of x_paths is for the overfitting experiment
-        x_paths = ["data/maddox/images/x.018.png"]
-        y_paths = ["data/maddox/masks/x.018.png"]
-
 
         for idx, x_path in enumerate(x_paths):
             baz = load_img(x_path, color_mode="rgb")
@@ -140,10 +133,6 @@ class CellsGenerator(keras.utils.Sequence):
 
         x_patches = self.x_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
         y_patches = self.y_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
-
-        #FIXME Warning! Uncomment the following. This is for an experimentw here you force the network to overfit.
-        x_patches = self.x_patches[0:1] #Independent of batch index
-        y_patches = self.y_patches[0:1]
 
         x_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, 3), dtype="float32") #Input images are RGB
         y_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, 1), dtype="uint8")

@@ -46,31 +46,22 @@ def test_unet(config):
     if len(x.shape) == 2:
         x = numpy.stack((x,) * 3, axis=-1)
 
-    #FIXME Uncomment this when you are done with your overfitting experiment
 
-    #
-    # y_image = Image.open(join(target_dir, filename))
-    # y_pre = numpy.asarray(y_image, dtype="uint8")
-    # y = preprocessing.convert_labels(y_pre)
-    #
-    # save_dir = config["save_dir"]
-    # if not exists(save_dir):
-    #     makedirs(save_dir)
-    #
-    # # Visualize input image and ground-truth output
-    # io.imsave(f"{save_dir}/{filename}", x[:, :, 0])
-    # io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y, bg_label=0))
+    y_image = Image.open(join(target_dir, filename)) #Ground-truth label
+    y_pre = numpy.asarray(y_image, dtype="uint8")
+    y = preprocessing.convert_labels(y_pre)
 
-    # Make inference pass
-    pretrained = config["use_saved_model"] #If we want to make a prediction using an already trained model (trained by us)
-    probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, pad_size, num_classes, pretrained=pretrained)
-
-    print(probs.shape)
-
-    #FIXME : Comment this when done with overfitting experiment (Save dir is defined above)
     save_dir = config["save_dir"]
     if not exists(save_dir):
         makedirs(save_dir)
+
+    # Visualize input image and ground-truth output
+    io.imsave(f"{save_dir}/{filename}", x[:, :, 0])
+    io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y, bg_label=0))
+
+    # Make inference pass
+    pretrained = config["use_saved_model"] #If we want to make a prediction using the whole trained model (trained by us), vs the random decoder head
+    probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, pad_size, num_classes, pretrained=pretrained)
 
 
     # Convert whole probability map to color mask for each example in image

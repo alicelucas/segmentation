@@ -45,10 +45,7 @@ def unet_model(input_shape):
 
     # Create the feature extraction model
     down_stack = tf.keras.Model(inputs=base_model.input, outputs=base_model_outputs)
-
-    #FIXME:should you set this to False?
     down_stack.trainable = False
-
 
     #The decoder/upsampler is simply a series of upsample blocks implemented in TensorFlow examples.
     up_stack = [

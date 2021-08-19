@@ -3,6 +3,7 @@ from os.path import join, isfile
 
 import numpy
 import tensorflow as tf
+from matplotlib import pyplot as plt
 
 from input import Cells
 from models import model
@@ -61,8 +62,17 @@ def train_unet(config):
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    unet.fit(training_generator, epochs=epochs,
+    history = unet.fit(training_generator, epochs=epochs,
                         validation_data=validation_generator)
+
+    plt.plot(history.history["loss"])
+    plt.plot(history.history["val_loss"])
+    plt.title("Model loss")
+    plt.ylabel("Sparse categorical crossentropy")
+    plt.xlabel("Epoch")
+    plt.legend(["train", "val"], loc="upper right")
+    plt.savefig("loss.png")
+
 
     model_name = config["saved_model_name"]
     save_dir = config["save_dir"]

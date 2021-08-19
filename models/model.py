@@ -21,7 +21,7 @@ def upsample(filters, size, apply_dropout=False):
 
   return result
 
-def unet_model(input_shape):
+def unet_model(input_shape, dropout=False):
     """
     Simple segmentation from tensorflow tutorial: https://github.com/tensorflow/docs/blob/master/site/en/tutorials/images/segmentation.ipynb
     It's a Unet model with MobileVnet as encoder backbone
@@ -49,10 +49,10 @@ def unet_model(input_shape):
 
     #The decoder/upsampler is simply a series of upsample blocks implemented in TensorFlow examples.
     up_stack = [
-        upsample(512, 3),  # 7x7 -> 14x14
-        upsample(256, 3),  # 14x14 -> 28x28
-        upsample(128, 3),  # 28x28 -> 56x56
-        upsample(64, 3),  # 56x56 -> 112x112
+        upsample(512, 3, apply_dropout=dropout),  # 7x7 -> 14x14
+        upsample(256, 3, apply_dropout=dropout),  # 14x14 -> 28x28
+        upsample(128, 3, apply_dropout=dropout),  # 28x28 -> 56x56
+        upsample(64, 3, apply_dropout=dropout),  # 56x56 -> 112x112
     ]
 
     inputs = tf.keras.layers.Input(shape=[224, 224, 3])

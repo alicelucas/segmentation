@@ -19,7 +19,9 @@ def train_unet(config):
 
     optimizer_name = config["optimizer_name"]
 
-    unet = model.unet_model([input_size, input_size, 3]) #Assume training with 224 x 224 patches
+    dropout = config["dropout"]
+
+    unet = model.unet_model([input_size, input_size, 3], dropout=dropout) #Assume training with 224 x 224 patches
     unet.summary()
 
     base_learning_rate = config["lr"]

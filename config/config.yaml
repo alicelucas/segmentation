@@ -13,6 +13,7 @@ use_saved_model: True #If testing, whether to evaluate on random model or on pre
 train_image_dir: data/maddox/images
 train_mask_dir: data/maddox/masks
 augmentation: True
+dropout: True
 validation_percentage: 0.75 # 0.2
 lr: 0.001 #0.1 best for SGD
 batch_size: 1

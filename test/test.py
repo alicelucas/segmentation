@@ -69,7 +69,7 @@ def test_unet(config):
     io.imsave(f'{save_dir}/mask.{filenumber}.png', mask)
 
 
-def forward_pass(x, input_size, pad_size, num_classes, pretrained=False):
+def forward_pass(x, input_size, pad_size, num_classes, dropout=False, pretrained=False):
     """
     Given input, forward pass through model. If needed, patch up image.
     :param input: (B, N, M, C) input (full image)

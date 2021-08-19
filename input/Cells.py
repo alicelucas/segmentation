@@ -1,13 +1,10 @@
 import random
 
 import numpy as np
-from PIL import Image
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
 from utils import preprocessing
-
-from skimage import io, color
 
 
 class CellsGenerator(keras.utils.Sequence):

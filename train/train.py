@@ -17,6 +17,8 @@ def train_unet(config):
 
     input_size = config["input_size"]
 
+    optimizer_name = config["optimizer_name"]
+
     unet = model.unet_model([input_size, input_size, 3]) #Assume training with 224 x 224 patches
     unet.summary()
 
@@ -44,7 +46,14 @@ def train_unet(config):
     training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, pad_size, should_augment)
     validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, pad_size, should_augment)
 
-    unet.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
+    if optimizer_name == "Adam":
+        optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)
+    elif optimizer_name == "RMSProp":
+        optimizer = tf.keras.optimizers.RMSprop(lr=base_learning_rate)
+    elif optimizer_name == "SGD":
+        optimizer = tf.keras.optimizers.SGD(lr=base_learning_rate)
+
+    unet.compile(optimizer=optimizer,
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 

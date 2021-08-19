@@ -12,12 +12,11 @@ use_saved_model: True #If testing, whether to evaluate on random model or on pre
 #Training config
 train_image_dir: data/maddox/images
 train_mask_dir: data/maddox/masks
-augmentation: False
+augmentation: True
 validation_percentage: 0.75 # 0.2
 lr: 0.001 #0.1 best for SGD
 batch_size: 1
 epochs: 100
 optimizer_name: Adam #E.g. SGD, Adam, RMSProp
 saved_model_name: unet.h5
-#FIXME bring back should_augment
 

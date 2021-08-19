@@ -44,7 +44,7 @@ def train_unet(config):
     should_augment = config["augmentation"]
 
     training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, pad_size, should_augment)
-    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, pad_size, should_augment)
+    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, pad_size, should_augment=False)
 
     if optimizer_name == "Adam":
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)

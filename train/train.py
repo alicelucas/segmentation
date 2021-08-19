@@ -7,7 +7,7 @@ import tensorflow as tf
 from input import Cells
 from models import model
 
-from PIL import Image
+import math
 
 
 def train_unet(config):
@@ -36,7 +36,7 @@ def train_unet(config):
 
     all_idx = numpy.arange(len(input_img_paths))
     numpy.random.shuffle(all_idx)
-    val_train_idx = numpy.split(all_idx, [int(0.2 * len(input_img_paths)), int((1 - validation_percentage) * len(input_img_paths))])
+    val_train_idx = numpy.split(all_idx, [int(math.floor(validation_percentage * len(input_img_paths)))])
 
     batch_size = config["batch_size"]
 
@@ -46,7 +46,7 @@ def train_unet(config):
     should_augment = config["augmentation"]
 
     training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, pad_size, should_augment)
-    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),batch_size, patch_size, pad_size, should_augment=False)
+    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[0]), numpy.take(target_paths, val_train_idx[0]),batch_size, patch_size, pad_size, should_augment=False)
 
     if optimizer_name == "Adam":
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)
@@ -54,6 +54,8 @@ def train_unet(config):
         optimizer = tf.keras.optimizers.RMSprop(lr=base_learning_rate)
     elif optimizer_name == "SGD":
         optimizer = tf.keras.optimizers.SGD(lr=base_learning_rate)
+    else:
+        optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)
 
     unet.compile(optimizer=optimizer,
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),

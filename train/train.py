@@ -65,7 +65,7 @@ def train_unet(config):
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3)
 
     history = unet.fit(training_generator, epochs=epochs,
-                        validation_data=validation_generator, callbacks=[early_stopping], class_weight={0: 1., 1: 10, 2: 1})
+                        validation_data=validation_generator, callbacks=[early_stopping])
 
     plt.plot(history.history["loss"])
     plt.plot(history.history["val_loss"])

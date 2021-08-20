@@ -17,7 +17,7 @@ dropout: True
 validation_percentage: 0.2 # 0.2
 lr: 0.001 #0.1 best for SGD
 batch_size: 64
-epochs: 70
+epochs: 200
 optimizer_name: Adam #E.g. SGD, Adam, RMSProp
 saved_model_name: unet.h5
 

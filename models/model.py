@@ -74,10 +74,8 @@ def unet_model(input_shape, dropout=False):
     # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(
       output_channels, 3, strides=2,
-      padding='same')  #112x112 -> 224x224
+      padding='same', activation="softmax")  #112x112 -> 224x224
 
     x = last(x)
-
-    # outputs = tf.keras.layers.Conv2D(3, 1, padding="same", activation="sigmoid")(x)
 
     return tf.keras.Model(inputs=inputs, outputs=x)

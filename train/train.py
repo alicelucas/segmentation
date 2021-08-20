@@ -62,8 +62,10 @@ def train_unet(config):
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3)
+
     history = unet.fit(training_generator, epochs=epochs,
-                        validation_data=validation_generator)
+                        validation_data=validation_generator, callbacks=[early_stopping])
 
     plt.plot(history.history["loss"])
     plt.plot(history.history["val_loss"])

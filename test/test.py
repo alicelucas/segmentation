@@ -88,6 +88,8 @@ def forward_pass(x, input_size, pad_size, num_classes, dropout=False, pretrained
     else:
         unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]))
 
+    print(unet.summary())
+
     probs = numpy.zeros((1, x.shape[1] - 2 * pad_size, x.shape[2] - 2*pad_size,
                          num_classes))  # Probability map for the whole image
 

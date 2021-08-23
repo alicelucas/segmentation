@@ -3,6 +3,7 @@ import random
 import numpy as np
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from sklearn.preprocessing import LabelBinarizer
 
 from utils import preprocessing
 
@@ -24,7 +25,6 @@ class CellsGenerator(keras.utils.Sequence):
         self.y_paths = []
 
         self.x_patches, self.y_patches = self.create_patches(x_paths, y_paths)
-
 
 
         #Randomize the dataset here
@@ -85,7 +85,13 @@ class CellsGenerator(keras.utils.Sequence):
                         continue
 
                     patch = np.pad(patch, ((pad_size, pad_size), (pad_size, pad_size), (0, 0)))  # add padding
-                    y_patches.append(patch)
+
+                    #Convert y integer labels to one-hot labels
+                    label_binarizer = LabelBinarizer()
+                    label_binarizer.fit(range(np.amax(patch) + 1))
+                    one_hot_patch = np.reshape(label_binarizer.transform(patch[:, :, 0].flatten()), [patch.shape[0], patch.shape[1], -1])
+
+                    y_patches.append(one_hot_patch)
 
                     # Extract x-patch
                     patch = x[pad_size + self.patch_size * i:self.patch_size * (i + 1) - pad_size, pad_size + self.patch_size * j:self.patch_size * (j + 1) - pad_size,
@@ -131,8 +137,9 @@ class CellsGenerator(keras.utils.Sequence):
         x_patches = self.x_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
         y_patches = self.y_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
 
-        x_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, 3), dtype="float32") #Input images are RGB
-        y_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, 1), dtype="uint8")
+        num_classes = y_patches[0].shape[2]
+        x_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, num_classes), dtype="float32") #Input images are RGB
+        y_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, num_classes), dtype="float32") #One hot encoded
 
         #Go through each patch in batch and augment it
         for i in range(len(x_patches)):

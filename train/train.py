@@ -59,7 +59,7 @@ def train_unet(config):
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)
 
     unet.compile(optimizer=optimizer,
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3)
@@ -70,7 +70,7 @@ def train_unet(config):
     plt.plot(history.history["loss"])
     plt.plot(history.history["val_loss"])
     plt.title("Model loss")
-    plt.ylabel("Sparse categorical crossentropy")
+    plt.ylabel("Categorical crossentropy")
     plt.xlabel("Epoch")
     plt.legend(["train", "val"], loc="upper right")
     plt.savefig("loss.png")

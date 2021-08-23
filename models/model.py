@@ -21,7 +21,7 @@ def upsample(filters, size, apply_dropout=False):
 
   return result
 
-def unet_model(input_shape, dropout=False):
+def unet_model(input_shape, crop_size, dropout=False):
     """
     Simple segmentation from tensorflow tutorial: https://github.com/tensorflow/docs/blob/master/site/en/tutorials/images/segmentation.ipynb
     It's a Unet model with MobileVnet as encoder backbone
@@ -76,6 +76,8 @@ def unet_model(input_shape, dropout=False):
       output_channels, 3, strides=2,
       padding='same', activation="softmax")  #112x112 -> 224x224
 
-    x = last(x)
+    crop = tf.keras.layers.Cropping2D(cropping=((crop_size, crop_size), (crop_size, crop_size))) #224 x 224 -> 192 x 192
+
+    x = crop(last(x))
 
     return tf.keras.Model(inputs=inputs, outputs=x)

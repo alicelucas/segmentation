@@ -22,7 +22,9 @@ def train_unet(config):
 
     dropout = config["dropout"]
 
-    unet = model.unet_model([input_size, input_size, 3], dropout=dropout) #Assume training with 224 x 224 patches
+    crop_size = config["crop_border"]
+
+    unet = model.unet_model([input_size, input_size, 3], crop_size, dropout=dropout) #Assume training with 224 x 224 patches
     unet.summary()
 
     base_learning_rate = config["lr"]
@@ -46,8 +48,8 @@ def train_unet(config):
 
     should_augment = config["augmentation"]
 
-    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, pad_size, should_augment)
-    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[0]), numpy.take(target_paths, val_train_idx[0]), 8, patch_size, pad_size, should_augment=False)
+    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]), batch_size, patch_size, pad_size, crop_size, should_augment)
+    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[0]), numpy.take(target_paths, val_train_idx[0]), 8, patch_size, pad_size, crop_size, should_augment=False)
 
     if optimizer_name == "Adam":
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)

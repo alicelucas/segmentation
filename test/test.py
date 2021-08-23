@@ -23,6 +23,7 @@ def test_unet(config):
     filepath = config["test_filepath"]
     input_size = config["input_size"]
     pad_size = config["pad_size"]
+    crop_size = config["crop_border"]
 
     #Parse image dir and filename:
     slash = filepath.rfind("/")
@@ -62,7 +63,7 @@ def test_unet(config):
 
     # Make inference pass
     pretrained = config["use_saved_model"] #If we want to make a prediction using the whole trained model (trained by us), vs the random decoder head
-    probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, pad_size, num_classes, pretrained=pretrained)
+    probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, pad_size, crop_size, num_classes, pretrained=pretrained)
 
 
     # Convert whole probability map to color mask for each example in image
@@ -70,7 +71,7 @@ def test_unet(config):
     io.imsave(f'{save_dir}/mask.{filenumber}.png', mask)
 
 
-def forward_pass(x, input_size, pad_size, num_classes, dropout=False, pretrained=False):
+def forward_pass(x, input_size, pad_size, num_classes, crop_size, dropout=False, pretrained=False):
     """
     Given input, forward pass through model. If needed, patch up image.
     :param input: (B, N, M, C) input (full image)
@@ -86,7 +87,7 @@ def forward_pass(x, input_size, pad_size, num_classes, dropout=False, pretrained
     if pretrained:
         unet = models.load_model('./unet.h5')
     else:
-        unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]))
+        unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]), crop_size=crop_size)
 
     print(unet.summary())
 

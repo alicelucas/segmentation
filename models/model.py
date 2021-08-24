@@ -77,15 +77,8 @@ def unet_model(input_shape, crop_size, dropout=False):
       padding='same')
 
     crop = tf.keras.layers.Cropping2D(cropping=((crop_size, crop_size), (crop_size, crop_size))) #224 x 224 -> 192 x 192
-
-    x = last(x) #112x112 -> 224x224
-
     out = tf.keras.layers.Softmax()
 
-    final = out(x)
+    x = crop(out(last(x)))
 
-    cropped = crop(final)
-    # x = crop(x)  # 224 x 224 -> 192 x 192
-
-
-    return tf.keras.Model(inputs=inputs, outputs=cropped)
+    return tf.keras.Model(inputs=inputs, outputs=x)

@@ -1,14 +1,11 @@
 import random
 
 import numpy as np
+from sklearn.preprocessing import LabelBinarizer
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
-from sklearn.preprocessing import LabelBinarizer
 
 from utils import preprocessing
-
-from skimage import io, color
-
 
 
 class CellsGenerator(keras.utils.Sequence):
@@ -86,10 +83,6 @@ class CellsGenerator(keras.utils.Sequence):
                     # Only keep the patch if it has non-zero labels (i.e., not just black)
                     if 2 not in cropped_patch[:, :, 0]:
                         continue
-
-                    # FIXME tmp debug code
-                    # io.imsave(f"TMP2_x.png", x_batch[0])
-                    # io.imsave(f"TMP/{idx}.{i}.{j}.png", color.label2rgb(cropped_patch[:, :, 0], bg_label=0))
 
                     # Convert y integer labels to one-hot labels
                     label_binarizer = LabelBinarizer()

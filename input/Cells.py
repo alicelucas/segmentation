@@ -7,6 +7,9 @@ from sklearn.preprocessing import LabelBinarizer
 
 from utils import preprocessing
 
+from skimage import io, color
+
+
 
 class CellsGenerator(keras.utils.Sequence):
     """
@@ -51,8 +54,6 @@ class CellsGenerator(keras.utils.Sequence):
         x_patches = []
         y_patches = []
 
-        pad_size = self.pad_size
-
         for idx, x_path in enumerate(x_paths):
             baz = load_img(x_path, color_mode="rgb")
             x = np.array(img_to_array(baz), dtype="float32")
@@ -78,19 +79,23 @@ class CellsGenerator(keras.utils.Sequence):
                     patch = y[self.patch_size * i:self.patch_size * (i + 1),
                             self.patch_size * j:self.patch_size * (j + 1), :]  # extract patch
 
+                    cropped_patch = patch[self.crop_border: patch.shape[0] - self.crop_border,
+                                    self.crop_border: patch.shape[1] - self.crop_border, :]
+
+
                     # Only keep the patch if it has non-zero labels (i.e., not just black)
-                    if 1 not in patch[:, :, 0]:
+                    if 2 not in cropped_patch[:, :, 0]:
                         continue
+
+                    # FIXME tmp debug code
+                    # io.imsave(f"TMP2_x.png", x_batch[0])
+                    # io.imsave(f"TMP/{idx}.{i}.{j}.png", color.label2rgb(cropped_patch[:, :, 0], bg_label=0))
 
                     # Convert y integer labels to one-hot labels
                     label_binarizer = LabelBinarizer()
-                    label_binarizer.fit(range(np.amax(patch) + 1))
-                    one_hot_patch = np.reshape(label_binarizer.transform(patch[:, :, 0].flatten()),
-                                               [patch.shape[0], patch.shape[1], -1])
-
-                    # Crop y_patch to account for border effects (output of model will be cropped as well)
-                    one_hot_patch = one_hot_patch[self.crop_border: one_hot_patch.shape[0] - self.crop_border,
-                                    self.crop_border: one_hot_patch.shape[1] - self.crop_border, :]
+                    label_binarizer.fit(range(np.amax(cropped_patch) + 1))
+                    one_hot_patch = np.reshape(label_binarizer.transform(cropped_patch[:, :, 0].flatten()),
+                                               [cropped_patch.shape[0], cropped_patch.shape[1], -1])
 
                     y_patches.append(one_hot_patch)
 

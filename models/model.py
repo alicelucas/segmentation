@@ -74,10 +74,18 @@ def unet_model(input_shape, crop_size, dropout=False):
     # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(
       output_channels, 3, strides=2,
-      padding='same', activation="softmax")  #112x112 -> 224x224
+      padding='same')
 
     crop = tf.keras.layers.Cropping2D(cropping=((crop_size, crop_size), (crop_size, crop_size))) #224 x 224 -> 192 x 192
 
-    x = crop(last(x))
+    x = last(x) #112x112 -> 224x224
 
-    return tf.keras.Model(inputs=inputs, outputs=x)
+    out = tf.keras.layers.Softmax()
+
+    final = out(x)
+
+    cropped = crop(final)
+    # x = crop(x)  # 224 x 224 -> 192 x 192
+
+
+    return tf.keras.Model(inputs=inputs, outputs=cropped)

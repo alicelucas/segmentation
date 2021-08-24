@@ -63,7 +63,7 @@ def test_unet(config):
 
     # Make inference pass
     pretrained = config["use_saved_model"] #If we want to make a prediction using the whole trained model (trained by us), vs the random decoder head
-    probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, pad_size, crop_size, num_classes, pretrained=pretrained)
+    probs = forward_pass(x[numpy.newaxis, :, :, :], input_size, num_classes, crop_size, pretrained=pretrained)
 
 
     # Convert whole probability map to color mask for each example in image
@@ -71,7 +71,7 @@ def test_unet(config):
     io.imsave(f'{save_dir}/mask.{filenumber}.png', mask)
 
 
-def forward_pass(x, input_size, pad_size, num_classes, crop_size, dropout=False, pretrained=False):
+def forward_pass(x, input_size, num_classes, crop_size, dropout=False, pretrained=False):
     """
     Given input, forward pass through model. If needed, patch up image.
     :param input: (B, N, M, C) input (full image)
@@ -83,6 +83,8 @@ def forward_pass(x, input_size, pad_size, num_classes, crop_size, dropout=False,
     """
     print("Image shape:", x.shape)
 
+    #FIXME reove unneccessary pad_size variable
+
     # Initialize model
     if pretrained:
         unet = models.load_model('./unet.h5')
@@ -91,7 +93,7 @@ def forward_pass(x, input_size, pad_size, num_classes, crop_size, dropout=False,
 
     print(unet.summary())
 
-    probs = numpy.zeros((1, x.shape[1] - 2 * pad_size, x.shape[2] - 2*pad_size,
+    probs = numpy.zeros((1, x.shape[1] - 2 * crop_size, x.shape[2] - 2*crop_size,
                          num_classes))  # Probability map for the whole image
 
     # Extract patches over image since MobileNet expects 224x224 input
@@ -100,30 +102,41 @@ def forward_pass(x, input_size, pad_size, num_classes, crop_size, dropout=False,
     overflow_row, overflow_col = 0, 0
 
     #Iterate over image and send patches individually to MobileNet
-    while start_row < x.shape[1] - 2 * pad_size:
+    while start_row < x.shape[1] - 2 * crop_size:
         overflow_col = 0
         start_col = 0
         end_col = input_size
-        while start_col < x.shape[2] - 2 * pad_size:
+        while start_col < x.shape[2] - 2 * crop_size:
+            print(start_col, end_col)
             #Pad if we are outside of boundary of image
             if end_col > x.shape[2] and end_row < x.shape[1]:
                 overflow_col = end_col - x.shape[2]
                 patch = numpy.pad(x[:, start_row: end_row, start_col: x.shape[2], :], ((0, 0), (0, 0), (0, overflow_col), (0, 0)))
+                patch_prob = unet.predict(patch)  # forward pass
+                probs[:, start_row:end_row - 2 * crop_size, start_col:end_col, :] = patch_prob[:, : input_size - overflow_row, : input_size - overflow_col,:]
             elif end_row > x.shape[1] and end_col < x.shape[2]:
                 overflow_row = end_row - x.shape[1]
                 patch = numpy.pad(x[:, start_row: x.shape[1], start_col: end_col, :], ((0, 0), (0, overflow_row), (0, 0), (0, 0)))
+                patch_prob = unet.predict(patch)  # forward pass
+                probs[:, start_row:end_row, start_col:end_col - 2 * crop_size, :] = patch_prob[:, : input_size - overflow_row, : input_size - overflow_col,:]
             elif end_row > x.shape[1] and end_col > x.shape[2]:
                 overflow_row = end_row - x.shape[1]
                 overflow_col = end_col - x.shape[2]
                 patch = numpy.pad(x[:, start_row: x.shape[1], start_col: x.shape[2], :], ((0, 0), (0, overflow_row), (0, overflow_col), (0, 0)))
+                patch_prob = unet.predict(patch)  # forward pass
+                probs[:, start_row:end_row, start_col:end_col, :] = patch_prob[:, : input_size - overflow_row, : input_size - overflow_col,:]
+
             else:
                 patch = x[:, start_row: end_row, start_col: end_col, :]  # extract patch
+                patch_prob = unet.predict(patch)  # forward pass
+                probs[:, start_row:end_row - 2 * crop_size, start_col:end_col - 2 * crop_size, :] = patch_prob[:,
+                                                                                                    : input_size - overflow_row,
+                                                                                                    : input_size - overflow_col,
+                                                                                                    :]
 
-            patch_prob = unet.predict(patch)  # forward pass
-            probs[:, start_row:end_row - 2 * pad_size, start_col:end_col - 2 * pad_size, :] = patch_prob[:, pad_size: input_size - pad_size - overflow_row, pad_size: input_size - pad_size - overflow_col,:] #Crop to get rid of border effects
-            start_col += input_size - 2 * pad_size
+            start_col += input_size - 2 * crop_size
             end_col = start_col + input_size
-        start_row += input_size - 2 * pad_size
+        start_row += input_size - 2 * crop_size
         end_row = start_row + input_size
 
     return probs

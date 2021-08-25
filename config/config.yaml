@@ -5,7 +5,6 @@ save_dir: .
 input_size: 224
 
 #Testing config
-pad_size: 64 #64 recommended to remove border effects on 1024 x 1024 test image
 test_filepath: 2.012.png #data/maddox/images/x.018.png
 test_save_dir: experiments/loss-categoricalcrossentropy/
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)

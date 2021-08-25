@@ -22,7 +22,6 @@ def test_unet(config):
 
     filepath = config["test_filepath"]
     input_size = config["input_size"]
-    pad_size = config["pad_size"]
     crop_size = config["crop_border"]
     model_path = config["model_filepath"]
 

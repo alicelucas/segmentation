@@ -13,13 +13,11 @@ class CellsGenerator(keras.utils.Sequence):
     Helper class to iterate over the input (from file paths to numpy arrays)
     """
 
-    def __init__(self, x_paths, y_paths, batch_size, patch_size, pad_size, crop_border, should_augment):
+    def __init__(self, x_paths, y_paths, batch_size, patch_size, crop_border, should_augment):
         self.do_augment = should_augment
 
         self.batch_size = batch_size
         self.patch_size = patch_size
-
-        self.pad_size = pad_size
 
         self.crop_border = crop_border
 

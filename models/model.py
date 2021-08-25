@@ -21,7 +21,7 @@ def upsample(filters, size, apply_dropout=False):
 
   return result
 
-def unet_model(input_shape, crop_size, dropout=False):
+def unet_model(input_shape, crop_size=4, dropout=False):
     """
     Simple segmentation from tensorflow tutorial: https://github.com/tensorflow/docs/blob/master/site/en/tutorials/images/segmentation.ipynb
     It's a Unet model with MobileVnet as encoder backbone

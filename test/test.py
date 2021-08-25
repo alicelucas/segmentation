@@ -83,13 +83,11 @@ def forward_pass(x, input_size, num_classes, crop_size, dropout=False, pretraine
     """
     print("Image shape:", x.shape)
 
-    #FIXME reove unneccessary pad_size variable
-
     # Initialize model
     if pretrained:
         unet = models.load_model('./unet.h5')
     else:
-        unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]), crop_size=crop_size)
+        unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]))
 
     print(unet.summary())
 
@@ -107,24 +105,23 @@ def forward_pass(x, input_size, num_classes, crop_size, dropout=False, pretraine
         start_col = 0
         end_col = input_size
         while start_col < x.shape[2] - 2 * crop_size:
-            print(start_col, end_col)
             #Pad if we are outside of boundary of image
             if end_col > x.shape[2] and end_row < x.shape[1]:
                 overflow_col = end_col - x.shape[2]
                 patch = numpy.pad(x[:, start_row: end_row, start_col: x.shape[2], :], ((0, 0), (0, 0), (0, overflow_col), (0, 0)))
                 patch_prob = unet.predict(patch)  # forward pass
-                probs[:, start_row:end_row - 2 * crop_size, start_col:end_col, :] = patch_prob[:, : input_size - overflow_row, : input_size - overflow_col,:]
+                probs[:, start_row:end_row - 2 * crop_size, start_col:end_col, :] = patch_prob[:, : input_size - overflow_row, : input_size - overflow_col - 2 * crop_size,:]
             elif end_row > x.shape[1] and end_col < x.shape[2]:
                 overflow_row = end_row - x.shape[1]
                 patch = numpy.pad(x[:, start_row: x.shape[1], start_col: end_col, :], ((0, 0), (0, overflow_row), (0, 0), (0, 0)))
                 patch_prob = unet.predict(patch)  # forward pass
-                probs[:, start_row:end_row, start_col:end_col - 2 * crop_size, :] = patch_prob[:, : input_size - overflow_row, : input_size - overflow_col,:]
+                probs[:, start_row:end_row, start_col:end_col - 2 * crop_size, :] = patch_prob[:, : input_size - overflow_row - 2 * crop_size, : input_size - overflow_col,:]
             elif end_row > x.shape[1] and end_col > x.shape[2]:
                 overflow_row = end_row - x.shape[1]
                 overflow_col = end_col - x.shape[2]
                 patch = numpy.pad(x[:, start_row: x.shape[1], start_col: x.shape[2], :], ((0, 0), (0, overflow_row), (0, overflow_col), (0, 0)))
                 patch_prob = unet.predict(patch)  # forward pass
-                probs[:, start_row:end_row, start_col:end_col, :] = patch_prob[:, : input_size - overflow_row, : input_size - overflow_col,:]
+                probs[:, start_row:end_row, start_col:end_col, :] = patch_prob[:, : input_size - overflow_row - 2 * crop_size, : input_size - overflow_col - 2 * crop_size,:]
 
             else:
                 patch = x[:, start_row: end_row, start_col: end_col, :]  # extract patch

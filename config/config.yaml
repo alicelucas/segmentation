@@ -6,8 +6,10 @@ input_size: 224
 
 #Testing config
 pad_size: 64 #64 recommended to remove border effects on 1024 x 1024 test image
-test_filepath: x.018.png #data/maddox/images/x.018.png
+test_filepath: 2.012.png #data/maddox/images/x.018.png
+test_save_dir: experiments/loss-categoricalcrossentropy/
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
+model_filepath: experiments/loss-categoricalcrossentropy/unet.h5 #Path to saved model file
 
 #Training config
 train_image_dir: data/maddox/images
@@ -18,7 +20,7 @@ validation_percentage: 0.2 # 0.2
 lr: 0.001 #0.1 best for SGD
 batch_size: 4
 crop_border: 4 #Amount to crop on each side when training
-epochs: 200
+epochs: 5
 optimizer_name: Adam #E.g. SGD, Adam, RMSProp
 saved_model_name: unet.h5
 

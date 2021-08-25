@@ -3,12 +3,14 @@ from os.path import join, isfile
 
 import numpy
 import tensorflow as tf
+import tensorflow_addons as tfa
 from matplotlib import pyplot as plt
 
 from input import Cells
 from models import model
 
 import math
+
 
 
 def train_unet(config):
@@ -61,8 +63,11 @@ def train_unet(config):
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)
 
     unet.compile(optimizer=optimizer,
-                  loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
                   metrics=['accuracy'])
+    # unet.compile(optimizer=optimizer,
+    #               loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+    #               metrics=['accuracy'])
 
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3)
 

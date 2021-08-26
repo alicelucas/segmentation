@@ -1,5 +1,7 @@
 from os.path import join, exists
 from os import makedirs
+from losses.weighted_categorical_cross_entropy import weighted_categorical_crossentropy
+
 
 import numpy
 from PIL import Image
@@ -85,7 +87,7 @@ def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=F
 
     # Initialize model
     if pretrained:
-        unet = models.load_model(model_path)
+        unet = models.load_model(model_path, custom_objects={"loss": weighted_categorical_crossentropy })
     else:
         unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]))
 

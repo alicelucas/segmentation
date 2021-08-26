@@ -13,3 +13,4 @@ test/__pycache__/
 *.h5
 .idea/
 experiments/
+losses/__pycache__/

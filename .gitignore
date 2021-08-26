@@ -12,3 +12,4 @@ test/__pycache__/
 *.png
 *.h5
 .idea/
+experiments/

@@ -5,11 +5,14 @@ import numpy
 import tensorflow as tf
 import tensorflow_addons as tfa
 from matplotlib import pyplot as plt
+from tensorflow.keras.losses import CategoricalCrossentropy
 
 from input import Cells
 from models import model
 
 import math
+
+from losses.weighted_categorical_cross_entropy import weighted_categorical_crossentropy
 
 
 
@@ -61,12 +64,12 @@ def train_unet(config):
     else:
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)
 
+    # loss = CategoricalCrossentropy()
+    loss = weighted_categorical_crossentropy(weights=[1, 10, 1])
+
     unet.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
+                  loss=loss,
                   metrics=['accuracy'])
-    # unet.compile(optimizer=optimizer,
-    #               loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
-    #               metrics=['accuracy'])
 
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3)
 

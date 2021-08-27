@@ -18,7 +18,7 @@ dropout: True
 validation_percentage: 0.2 # 0.2
 lr: 0.001
 batch_size: 64
-weight_class: [1, 5, 1] #What weight to use for the minority border class
+weight_class: [1, 5, 3] #What weight to use for the minority border class
 crop_border: 4 #Amount to crop on each side when training
 epochs: 200
 optimizer_name: Adam #E.g. SGD, Adam, RMSProp

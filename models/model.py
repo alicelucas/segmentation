@@ -38,8 +38,8 @@ def unet_model(input_shape, crop_size=4, dropout=False):
         'block_1_expand_relu',   # 112x112
         'block_3_expand_relu',   # 56x56
         'block_6_expand_relu',   # 28x28
-        'block_13_expand_relu',  # 14x14
-        'block_16_project',      # 7x7
+        # 'block_13_expand_relu',  # 14x14
+        # 'block_16_project',      # 7x7
     ]
     base_model_outputs = [base_model.get_layer(name).output for name in layer_names]
 
@@ -49,8 +49,8 @@ def unet_model(input_shape, crop_size=4, dropout=False):
 
     #The decoder/upsampler is simply a series of upsample blocks implemented in TensorFlow examples.
     up_stack = [
-        upsample(512, 3, apply_dropout=dropout),  # 7x7 -> 14x14
-        upsample(256, 3, apply_dropout=dropout),  # 14x14 -> 28x28
+        # upsample(512, 3, apply_dropout=dropout),  # 7x7 -> 14x14
+        # upsample(256, 3, apply_dropout=dropout),  # 14x14 -> 28x28
         upsample(128, 3, apply_dropout=dropout),  # 28x28 -> 56x56
         upsample(64, 3, apply_dropout=dropout),  # 56x56 -> 112x112
     ]

@@ -85,13 +85,15 @@ def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=F
     """
     print("Image shape:", x.shape)
 
+    #FIXME this is temporary, for JJs experiment
+    x /= 255
+
     # Initialize model
     if pretrained:
         unet = models.load_model(model_path, custom_objects={"loss": weighted_categorical_crossentropy })
     else:
         unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]))
 
-    print(unet.summary())
 
     probs = numpy.zeros((1, x.shape[1] - 2 * crop_size, x.shape[2] - 2*crop_size,
                          num_classes))  # Probability map for the whole image

@@ -5,10 +5,10 @@ save_dir: .
 input_size: 224
 
 #Testing config
-test_filepath: 2.012.png #data/maddox/images/x.018.png
-test_save_dir: experiments/loss-weighted-categorical-10/
+test_filepath: x.018.png #data/maddox/images/x.018.png
+test_save_dir: experiments/loss-weighted-categorical-5/
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
-model_filepath: experiments/loss-weighted-categorical-10/unet.h5 #Path to saved model file
+model_filepath: experiments/loss-weighted-categorical-5/unet.h5 #Path to saved model file
 
 #Training config
 train_image_dir: data/maddox/images
@@ -18,7 +18,7 @@ dropout: True
 validation_percentage: 0.2 # 0.2
 lr: 0.001
 batch_size: 64
-weight_border_class: 5 #What weight to use for the minority border class
+weight_class: [1, 5, 1] #What weight to use for the minority border class
 crop_border: 4 #Amount to crop on each side when training
 epochs: 200
 optimizer_name: Adam #E.g. SGD, Adam, RMSProp

@@ -29,7 +29,7 @@ def train_unet(config):
 
     crop_size = config["crop_border"]
 
-    weight_border = config["weight_border_class"]
+    weight_class = config["weight_class"]
 
     unet = model.unet_model([input_size, input_size, 3], crop_size, dropout=dropout) #Assume training with 224 x 224 patches
     unet.summary()
@@ -67,7 +67,7 @@ def train_unet(config):
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)
 
     # loss = CategoricalCrossentropy()
-    loss = weighted_categorical_crossentropy(weights=[1, weight_border, 1])
+    loss = weighted_categorical_crossentropy(weights=weight_class)
 
     unet.compile(optimizer=optimizer,
                   loss=loss,

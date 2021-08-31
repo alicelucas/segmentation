@@ -18,7 +18,7 @@ draw_border: False #True for maddox
 #Training config
 train_image_dir: data/2018-DSB/semantic/train/images
 train_mask_dir: data/2018-DSB/semantic/train/masks
-augmentation: True
+augmentation: False
 dropout: True
 validation_percentage: 0.2 # 0.2
 lr: 0.001

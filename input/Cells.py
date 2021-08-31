@@ -1,7 +1,7 @@
 import random
 
 import numpy as np
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import OneHotEncoder
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
@@ -22,7 +22,7 @@ class CellsGenerator(keras.utils.Sequence):
         self.crop_border = crop_border
 
         self.background_value = background_value
-        self.cell_values = cell_value
+        self.cell_value = cell_value
         self.draw_border = draw_border
 
         self.x_paths = []
@@ -83,14 +83,16 @@ class CellsGenerator(keras.utils.Sequence):
 
 
                     # Only keep the patch if it has non-zero labels (i.e., not just black)
-                    if 2 not in cropped_patch[:, :, 0]:
+                    if 1 not in cropped_patch[:, :, 0]:
                         continue
 
                     # Convert y integer labels to one-hot labels
-                    label_binarizer = LabelBinarizer()
-                    label_binarizer.fit(range(np.amax(cropped_patch) + 1))
-                    one_hot_patch = np.reshape(label_binarizer.transform(cropped_patch[:, :, 0].flatten()),
-                                               [cropped_patch.shape[0], cropped_patch.shape[1], -1])
+                    #FIXME This is not producing the output shape I expect
+                    one_hot_encoder = OneHotEncoder()
+                    one_hot_patch = one_hot_encoder.fit_transform(cropped_patch[:, :, 0]).toarray()
+                    # one_hot_patch = one_hot_encoder.transform(cropped_patch[:, :, 0])
+                    # one_hot_patch = np.reshape(one_hot_encoder.transform(cropped_patch[:, :, 0].flatten()),
+                    #                            [cropped_patch.shape[0], cropped_patch.shape[1], -1])
 
                     y_patches.append(one_hot_patch)
 

@@ -31,7 +31,7 @@ def flip(x_and_y):
     return numpy.flip(x, 1), numpy.flip(y, 1)
 
 
-def convert_labels(data):
+def convert_labels(data, cell_value, background_value, draw_border):
   """
   From gt segmentation masks for instance segmentations to 3-class semantic segmentation
   :return: The three class segmentation mask with (0, 1, 2) labels for background, border, inside cell
@@ -43,21 +43,25 @@ def convert_labels(data):
   red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
 
   #Replace "inside cell labels with 2"
-  cell_label = 178, 178, 178
+  cell_label = cell_value, cell_value, cell_value #178, 178, 178
   cell_pixels = (red == cell_label[0]) & (green == cell_label[1]) & (blue == cell_label[2]) #Get pixel indices that have that color
   #pixels is a (image_size, image_size) array with True and False values
-  y[cell_pixels] = 2
+  if draw_border:
+    y[cell_pixels] = 2
+  else:
+    y[cell_pixels] = 1
 
   #Replace background label with 0
-  background_label = 0, 0, 0
+  background_label = background_value, background_value, background_value
   background_pixels = (red == background_label[0]) & (green == background_label[1]) & (
               blue == background_label[2])
   y[background_pixels] = 0
 
-  # Replace border label with 1
-  #Here making the assumption that everything that is not background or cell was labeled as border
-  border_pixels = numpy.logical_not(numpy.logical_or(background_pixels, cell_pixels))
-  y[border_pixels] = 1
+  if draw_border:
+    # Replace border label with 1
+    #Here making the assumption that everything that is not background or cell was labeled as border
+    border_pixels = numpy.logical_not(numpy.logical_or(background_pixels, cell_pixels))
+    y[border_pixels] = 1
 
   return y
 

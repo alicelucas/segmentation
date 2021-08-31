@@ -6,19 +6,24 @@ input_size: 224
 
 #Testing config
 test_filepath: 2.012.png #data/maddox/images/x.018.png
-test_save_dir: experiments/loss-weighted-categorical-1-5-3-small/
+test_save_dir: experiments/loss-weighted-categorical/
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
-model_filepath: experiments/loss-weighted-categorical-1-5-3-small/unet.h5 #Path to saved model file
+model_filepath: experiments/loss-weighted-categorical/unet.h5 #Path to saved model file
+
+#Data config
+cell: 255 #Expected pixel value for cell/nuclei label (178 for maddox, but usually 255)
+background: 0 #Expected value for background label
+draw_border: False #True for maddox
 
 #Training config
-train_image_dir: data/maddox/images
-train_mask_dir: data/maddox/masks
+train_image_dir: data/2018-DSB/semantic/train/images
+train_mask_dir: data/2018-DSB/semantic/train/masks
 augmentation: True
 dropout: True
 validation_percentage: 0.2 # 0.2
 lr: 0.001
 batch_size: 4
-weight_class: [1, 5, 3] #What weiwhy ght to use for the minority border class
+weight_class: [1, 1, 1] #What weight ght to use for the minority border class
 crop_border: 4 #Amount to crop on each side when training
 epochs: 200
 optimizer_name: Adam #E.g. SGD, Adam, RMSProp

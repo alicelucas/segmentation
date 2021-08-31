@@ -13,13 +13,17 @@ class CellsGenerator(keras.utils.Sequence):
     Helper class to iterate over the input (from file paths to numpy arrays)
     """
 
-    def __init__(self, x_paths, y_paths, batch_size, patch_size, crop_border, should_augment):
+    def __init__(self, x_paths, y_paths, batch_size, patch_size, crop_border, background_value, cell_value, draw_border, should_augment):
         self.do_augment = should_augment
 
         self.batch_size = batch_size
         self.patch_size = patch_size
 
         self.crop_border = crop_border
+
+        self.background_value = background_value
+        self.cell_values = cell_value
+        self.draw_border = draw_border
 
         self.x_paths = []
         self.y_paths = []
@@ -55,7 +59,7 @@ class CellsGenerator(keras.utils.Sequence):
 
             foo = load_img(y_paths[idx], color_mode="rgb")
             data = np.array([img_to_array(foo)], dtype="uint8")
-            mask = preprocessing.convert_labels(data[0])
+            mask = preprocessing.convert_labels(data[0], self.cell_value, self.background_value, self.draw_border)
 
             y = np.expand_dims(mask, 2)
 

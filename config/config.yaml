@@ -4,6 +4,9 @@ save_dir: .
 
 input_size: 224
 
+project: dsb
+experiment_name: loss-categorical
+
 #Testing config
 test_filepath: 2.012.png #data/maddox/images/x.018.png
 test_save_dir: experiments/loss-weighted-categorical/

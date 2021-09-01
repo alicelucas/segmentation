@@ -1,7 +1,7 @@
 import random
 
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelBinarizer
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
@@ -54,6 +54,10 @@ class CellsGenerator(keras.utils.Sequence):
         y_patches = []
 
         for idx, x_path in enumerate(x_paths):
+
+            if idx % 200 == 0:
+                print(f"Loading and patching file #{idx} in {len(x_paths)} files")
+
             baz = load_img(x_path, color_mode="rgb")
             x = np.array(img_to_array(baz), dtype="float32")
 
@@ -87,13 +91,12 @@ class CellsGenerator(keras.utils.Sequence):
                         continue
 
                     # Convert y integer labels to one-hot labels
-                    #FIXME This is not producing the output shape I expect
-                    one_hot_encoder = OneHotEncoder()
-                    one_hot_patch = one_hot_encoder.fit_transform(cropped_patch[:, :, 0]).toarray()
-                    # one_hot_patch = one_hot_encoder.transform(cropped_patch[:, :, 0])
-                    # one_hot_patch = np.reshape(one_hot_encoder.transform(cropped_patch[:, :, 0].flatten()),
-                    #                            [cropped_patch.shape[0], cropped_patch.shape[1], -1])
-
+                    label_binarizer = LabelBinarizer()
+                    label_binarizer.fit(range(np.amax(cropped_patch) + 1))
+                    one_hot_patch = np.reshape(label_binarizer.transform(cropped_patch[:, :, 0].flatten()),
+                                               [cropped_patch.shape[0], cropped_patch.shape[1], -1])
+                    #WARNING: if only two classes, this will stay as a sparse matrix and will not be one-hot encoded
+                    #(from sklearn's documentation)
                     y_patches.append(one_hot_patch)
 
                     # Extract x-patch
@@ -136,7 +139,8 @@ class CellsGenerator(keras.utils.Sequence):
         y_patches = self.y_patches[batch_idx * self.batch_size: batch_idx * self.batch_size + self.batch_size]
 
         num_classes = y_patches[0].shape[2]
-        x_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, num_classes),
+        num_channels = x_patches[0].shape[2]
+        x_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, num_channels),
                            dtype="float32")  # Input images are RGB
         y_batch = np.zeros((self.batch_size, self.patch_size - 2 * self.crop_border,
                             self.patch_size - 2 * self.crop_border, num_classes),

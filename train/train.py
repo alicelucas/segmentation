@@ -5,7 +5,7 @@ import numpy
 import tensorflow as tf
 import tensorflow_addons as tfa
 from matplotlib import pyplot as plt
-from tensorflow.keras.losses import CategoricalCrossentropy
+from tensorflow.keras.losses import SparseCategoricalCrossentropy
 
 from input import Cells
 from models import model
@@ -45,8 +45,8 @@ def train_unet(config):
     # Get list of input files and target masks
     image_dir = config["train_image_dir"]
     target_dir = config["train_mask_dir"]
-    input_img_paths = [join(image_dir, f) for f in listdir(image_dir) if isfile(join(image_dir, f))]
-    target_paths = [join(target_dir, f) for f in listdir(target_dir) if isfile(join(target_dir, f))]
+    input_img_paths = [join(image_dir, f) for f in listdir(image_dir) if isfile(join(image_dir, f)) and not f.startswith('.')]
+    target_paths = [join(target_dir, f) for f in listdir(target_dir) if isfile(join(target_dir, f)) and not f.startswith('.')]
 
     all_idx = numpy.arange(len(input_img_paths))
     numpy.random.shuffle(all_idx)
@@ -58,7 +58,10 @@ def train_unet(config):
 
     should_augment = config["augmentation"]
 
-    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),
+    #FIXME remove this
+    max_files = 100
+
+    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1])[:max_files], numpy.take(target_paths, val_train_idx[1])[:max_files],
                                               batch_size, patch_size, crop_size, background_value, cell_value, draw_border, should_augment)
     validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[0]), numpy.take(target_paths, val_train_idx[0]),
                                                 8, patch_size, crop_size, background_value, cell_value, draw_border, should_augment=False)
@@ -73,7 +76,13 @@ def train_unet(config):
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)
 
     # loss = CategoricalCrossentropy()
-    loss = weighted_categorical_crossentropy(weights=weight_class)
+    #From the y label, determine whether it is one hot encoded or not. If not, you shoudl use sparse categorical cross entropy.
+    _, foo = training_generator.__getitem__(0)
+
+    if foo.shape[3] > 1: #If one hot encoded, use your custom cateogorical cross entropy
+        loss = weighted_categorical_crossentropy(weights=weight_class) #Custom categorical cross entropy where you can specify weights for each class
+    else: #Otherwise use tensorflow's sparsecategorical cross entropy
+        loss = SparseCategoricalCrossentropy()
 
     unet.compile(optimizer=optimizer,
                   loss=loss,

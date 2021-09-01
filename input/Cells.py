@@ -82,6 +82,9 @@ class CellsGenerator(keras.utils.Sequence):
                     patch = y[self.patch_size * i:self.patch_size * (i + 1),
                             self.patch_size * j:self.patch_size * (j + 1), :]  # extract patch
 
+                    if patch.shape[0] < self.patch_size or patch.shape[1] < self.patch_size:
+                        continue #only go through this if we extracted a (patch size x patch size) patch
+
                     cropped_patch = patch[self.crop_border: patch.shape[0] - self.crop_border,
                                     self.crop_border: patch.shape[1] - self.crop_border, :]
 

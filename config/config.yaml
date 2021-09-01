@@ -22,10 +22,10 @@ augmentation: False
 dropout: True
 validation_percentage: 0.2 # 0.2
 lr: 0.001
-batch_size: 4
+batch_size: 64
 weight_class: [1, 1, 1] #What weight ght to use for the minority border class
 crop_border: 4 #Amount to crop on each side when training
-epochs: 200
+epochs: 5
 optimizer_name: Adam #E.g. SGD, Adam, RMSProp
 saved_model_name: unet.h5
 

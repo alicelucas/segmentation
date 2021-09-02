@@ -1,3 +1,5 @@
+#!/bin/bash
+
 EXPERIMENT=$(grep -A3 'experiment_name:' config/config.yaml | head -n 1 | sed 's/.*: //')
 PROJECT=$(grep -A3 'project' config/config.yaml | head -n 1 | sed 's/.*: //')
 cd experiments

@@ -12,6 +12,8 @@ from utils import preprocessing
 
 from tensorflow.keras import models
 
+from os import path
+
 
 def test_unet(config):
     """
@@ -19,13 +21,13 @@ def test_unet(config):
     :param config: configuration params
     :return: nothing. Saves output prediction to an "images" directory.
     """
-    # Load input
-    num_classes = 3
 
     filepath = config["test_filepath"]
     input_size = config["input_size"]
     crop_size = config["crop_border"]
-    model_path = config["model_filepath"]
+    experiment_path = config["test_save_dir"]
+    model_path = path.join(experiment_path, "unet.h5")
+    num_classes = config["num_classes"]
 
     #Parse image dir and filename:
     slash = filepath.rfind("/")

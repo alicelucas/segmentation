@@ -1,4 +1,4 @@
-train: True
+train: False
 
 save_dir: .
 
@@ -8,10 +8,10 @@ project: dsb
 experiment_name: dummy-test
 
 #Testing config
-test_filepath: 2.012.png #data/maddox/images/x.018.png
-test_save_dir: experiments/loss-weighted-categorical/
+test_filepath: data/2018-DSB/semantic/train/images/0ddd8deaf1696db68b00c600601c6a74a0502caaf274222c8367bdc31458ae7e.png #data/maddox/images/x.018.png
+test_save_dir: experiments/dsb/baseline/
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
-model_filepath: experiments/loss-weighted-categorical/unet.h5 #Path to saved model file
+num_classes: 2
 
 #Data config
 cell: 255 #Expected pixel value for cell/nuclei label (178 for maddox, but usually 255)

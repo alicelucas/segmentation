@@ -1,11 +1,11 @@
-train: False
+train: True
 
 save_dir: .
 
 input_size: 224
 
 project: dsb
-experiment_name: dummy-test
+experiment_name: baseline
 
 #Testing config
 test_filepath: data/2018-DSB/semantic/train/images/0ddd8deaf1696db68b00c600601c6a74a0502caaf274222c8367bdc31458ae7e.png #data/maddox/images/x.018.png
@@ -28,7 +28,7 @@ lr: 0.001
 batch_size: 64
 weight_class: [1, 1, 1] #What weight ght to use for the minority border class
 crop_border: 4 #Amount to crop on each side when training
-epochs: 5
+epochs: 200
 optimizer_name: Adam #E.g. SGD, Adam, RMSProp
 saved_model_name: unet.h5
 

@@ -35,7 +35,9 @@ def train_unet(config):
     cell_value = config["cell"]
     draw_border = config["draw_border"]
 
-    unet = model.unet_model([input_size, input_size, 3], crop_size, dropout=dropout) #Assume training with 224 x 224 patches
+    num_classes = config["num_classes"]
+
+    unet = model.unet_model([input_size, input_size, 3], num_classes, crop_size, dropout=dropout) #Assume training with 224 x 224 patches
     unet.summary()
 
     base_learning_rate = config["lr"]

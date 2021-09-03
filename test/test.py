@@ -51,6 +51,9 @@ def test_unet(config):
     if len(x.shape) == 2:
         x = numpy.stack((x,) * 3, axis=-1)
 
+    if len(x.shape) == 3 and x.shape[2] == 4: #don't feed alpha channel to model
+        x = x[:, :, :3]
+
     save_dir = config["test_save_dir"]
     if not exists(save_dir):
         makedirs(save_dir)
@@ -91,7 +94,7 @@ def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=F
     if pretrained:
         unet = models.load_model(model_path, custom_objects={"loss": weighted_categorical_crossentropy })
     else:
-        unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]))
+        unet = model.unet_model(numpy.array([x.shape[1], x.shape[2], x.shape[3]]), num_classes)
 
     print(unet.summary())
 

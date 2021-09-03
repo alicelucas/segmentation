@@ -1,4 +1,4 @@
-train: True
+train: False
 
 save_dir: .
 
@@ -8,8 +8,8 @@ project: dsb
 experiment_name: baseline
 
 #Testing config
-test_filepath: data/2018-DSB/semantic/train/images/0ddd8deaf1696db68b00c600601c6a74a0502caaf274222c8367bdc31458ae7e.png #data/maddox/images/x.018.png
-test_save_dir: experiments/dsb/baseline/
+test_filepath: data/2018-DSB/semantic/train/images/0d3640c1f1b80f24e94cc9a5f3e1d9e8db7bf6af7d4aba920265f46cadc25e37.png #data/maddox/images/x.018.png
+test_save_dir: experiments/dsb/baseline-corrected/
 use_saved_model: True #If testing, whether to evaluate on random model or on pre-trained model (saved unet.h5)
 num_classes: 2
 

@@ -24,7 +24,7 @@ train_mask_dir: data/2018-DSB/semantic/train/masks
 augmentation: False
 dropout: True
 validation_percentage: 0.2 # 0.2
-train_percentage: 0.025 #How much of the dataset do we want to us
+train_percentage: 1 #How much of the dataset do we want to us
 
 lr: 0.001
 batch_size: 64

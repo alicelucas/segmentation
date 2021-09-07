@@ -43,6 +43,7 @@ def train_unet(config):
     base_learning_rate = config["lr"]
     epochs = config["epochs"]
     validation_percentage = config["validation_percentage"]
+    train_percentage = config["train_percentage"]
 
     # Get list of input files and target masks
     image_dir = config["train_image_dir"]
@@ -50,10 +51,14 @@ def train_unet(config):
     input_img_paths = [join(image_dir, f) for f in listdir(image_dir) if isfile(join(image_dir, f)) and not f.startswith('.')]
     target_paths = [join(target_dir, f) for f in listdir(target_dir) if isfile(join(target_dir, f)) and not f.startswith('.')]
 
+    #account for possibility of not using all of the training dataset
+    stop_idx = int(len(input_img_paths) * train_percentage)
+    input_img_paths = input_img_paths[:stop_idx]
+    target_paths = target_paths[:stop_idx]
+
     all_idx = numpy.arange(len(input_img_paths))
     numpy.random.shuffle(all_idx)
     val_train_idx = numpy.split(all_idx, [int(math.floor(validation_percentage * len(input_img_paths)))])
-
     batch_size = config["batch_size"]
 
     patch_size = config["input_size"]

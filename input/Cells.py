@@ -16,7 +16,6 @@ class CellsGenerator(keras.utils.Sequence):
     def __init__(self, x_paths, y_paths, batch_size, patch_size, crop_border, background_value, cell_value, draw_border, should_augment):
         self.do_augment = should_augment
 
-        self.batch_size = batch_size
         self.patch_size = patch_size
 
         self.crop_border = crop_border
@@ -29,6 +28,8 @@ class CellsGenerator(keras.utils.Sequence):
         self.y_paths = []
 
         self.x_patches, self.y_patches = self.create_patches(x_paths, y_paths)
+
+        self.batch_size = min(batch_size, len(self.x_patches))
 
         # Randomize the dataset here
         random.Random(1337).shuffle(self.x_patches)
@@ -68,7 +69,7 @@ class CellsGenerator(keras.utils.Sequence):
             y = np.expand_dims(mask, 2)
 
             if self.do_augment:
-                x, y = self.augment((x, y))  # Place augmented patch in batch
+                x, y = self.augment((x, y))  # Augment image
 
             # number of column directions
             n_row = x.shape[1] // self.patch_size
@@ -143,10 +144,11 @@ class CellsGenerator(keras.utils.Sequence):
 
         num_classes = y_patches[0].shape[2]
         num_channels = x_patches[0].shape[2]
-        x_batch = np.zeros((self.batch_size, self.patch_size, self.patch_size, num_channels),
+        x_shape = x_patches[0].shape[1]
+        y_shape = y_patches[0].shape[1]
+        x_batch = np.zeros((self.batch_size, x_shape, x_shape, num_channels),
                            dtype="float32")  # Input images are RGB
-        y_batch = np.zeros((self.batch_size, self.patch_size - 2 * self.crop_border,
-                            self.patch_size - 2 * self.crop_border, num_classes),
+        y_batch = np.zeros((self.batch_size, y_shape, y_shape, num_classes),
                            dtype="float32")  # One hot encoded
 
         # Go through each patch in batch and augment it

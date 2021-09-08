@@ -1,6 +1,60 @@
 import os
 from PIL import Image
 import numpy as np
+import skimage.io
+import pandas as pd
+
+def decode_DSB_test_set():
+    """
+    The DSB ground truth test set is provided as run-length-encoded data
+    Go through that data and get the semantic png masks
+    This code was taken from:
+    https://github.com/carpenterlab/2019_caicedo_dsb/blob/7ce8dd12be9d5ca3fe719a3a2e62bba42b63e3bb/unet4nuclei/00-download-dataset.ipynb
+    :return:
+    """
+
+    def decode(encoded, shape):
+        r, c = shape
+
+        if str(encoded) == 'nan':
+            return None
+
+        encoded = encoded.replace("[", "").replace("]", "").replace(",", " ")
+        encoded = [int(instance) for instance in encoded.split(" ") if instance != '']
+
+        image = np.zeros(r * c, dtype=np.uint8)
+
+        for index, size in np.array(encoded).reshape(-1, 2):
+            index -= 1
+
+            image[index:index + size] = 255
+
+        return image.reshape(c, r).transpose()
+
+    def label_objects(mask_objects, shape):
+        labels = np.zeros(shape, np.uint16)
+
+        for index, mask_object in enumerate(mask_objects.itertuples()):
+            decoded = decode(mask_object.EncodedPixels, shape)
+            if decoded is not None:
+                # labels[decoded == 255] = index + 1 #Instance segmentation
+                labels[decoded == 255] = 255 #Semantic segmentation
+
+        return labels
+
+    masks_csv = './data/2018-DSB/instance/stage1_solution.csv'
+    normalized_images_dir = "./data/2018-DSB/instance/stage1_test/"
+    out = "./data/2018-DSB/semantic/test/"
+
+    df = pd.read_csv(masks_csv)
+
+    for imId in df.ImageId.unique():
+        im = skimage.io.imread(normalized_images_dir + imId + "/images/" +  imId + ".png")
+        objects = label_objects(df[df.ImageId == imId], im.shape[0:2])
+        skimage.io.imsave(out + imId + ".png", objects)
+
+
+    pass
 
 def convert_DSB_to_semantic_masks(dataset_path, out_path):
     """

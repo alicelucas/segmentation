@@ -1,0 +1,25 @@
+# tensorflow_test.sub
+# starter submit file for CHTC jobs
+
+universe = docker
+docker_image = alicelucas/tensorflow:v4
+log = job_$(Cluster).log
+error = job_$(Cluster)_$(Process).err
+output = job_$(Cluster)_$(Process).out
+
+executable = segmentation.sh
+initial_dir = $(percentage)
+arguments = config.yaml
+transfer_input_files = config.yaml, ../segmentation/
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+request_cpus = 1
+request_gpus = 1
+request_memory = 10GB
+request_disk = 1GB
+
++WantGPULab = true
++GPUJobLength = "short"
+queue percentage from train_percentage.txt

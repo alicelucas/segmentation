@@ -2,6 +2,7 @@ import numpy
 from skimage import color
 from scipy import ndimage
 import random
+import numpy as np
 
 def rotate(x_and_y):
   """
@@ -39,11 +40,16 @@ def convert_labels(data, cell_value, background_value, draw_border):
 
   y = numpy.zeros((data.shape[0], data.shape[1]), dtype="uint8") #Greyscale
 
-  #Look at R, G, B channels in current mask
-  red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
+  if len(y.shape) == 3:
+    #Look at R, G, B channels in current mask
+    red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
+
+  elif len(y.shape) == 2:
+    #Greyscale case
+    red, green, blue = data[:, :], data[:, :], data[:, :]
 
   #Replace "inside cell labels with 2"
-  cell_label = cell_value, cell_value, cell_value #178, 178, 178
+  cell_label = cell_value, cell_value, cell_value #178, 178, 178 (or whatever was specified by the user)
   cell_pixels = (red == cell_label[0]) & (green == cell_label[1]) & (blue == cell_label[2]) #Get pixel indices that have that color
   #pixels is a (image_size, image_size) array with True and False values
   if draw_border:
@@ -74,3 +80,21 @@ def prob_to_mask(pred_mask):
   """
   label = numpy.argmax(pred_mask, axis=-1)
   return color.label2rgb(label, bg_label=0)
+
+
+def pilToTensor(im):
+  """
+  From PIL image to a tensor that is suitable for forward pass
+  :param im:
+  :return: the tensor to be sent to the model
+  """
+  x = np.asarray(im, dtype="float32")
+
+  if len(x.shape) == 2: #If greyscale input image, make RGB
+      x = np.stack((x,) * 3, axis=-1)
+
+  if len(x.shape) == 3 and x.shape[2] == 4: #if alpha channel present, don't feed alpha channel to model
+      x = x[:, :, :3]
+
+
+  return x[np.newaxis, :, :, :]

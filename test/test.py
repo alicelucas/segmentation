@@ -1,4 +1,4 @@
-from os.path import join, exists
+from os.path import exists
 from os import makedirs
 from losses.weighted_categorical_cross_entropy import weighted_categorical_crossentropy
 
@@ -15,101 +15,14 @@ from tensorflow.keras import models
 
 from os import path, listdir
 
-
 def test_unet(config):
     """
     Given file path, do a forward pass
     :param config: configuration params
     :return: nothing. Saves output prediction to an "images" directory.
     """
-
-    filepath = config["test_filepath"]
-    input_size = config["input_size"]
-    crop_size = config["crop_border"]
-    experiment_path = config["test_save_dir"]
-    model_path = path.join(experiment_path, "unet.h5")
-    num_classes = config["num_classes"]
-
-    background_value = config["background"]
-    cell_value = config["cell"]
-    draw_border = config["draw_border"]
-
-    #Parse image dir and filename:
-    slash = filepath.rfind("/")
-    image_dir = filepath[:slash]
-    filename = filepath[slash + 1:]
-
-    #Parse filenumber (follows maddox dataset structure)
-    nindex = filename.rfind(".")
-    filenumber = filename[nindex-3:nindex]
-
-
-    # Get list of input files and target mask
-    # Here we assume directory structue is name/masks/*.png and name/images/*.png
-    slash = image_dir.rfind("/")
-    target_dir = join(image_dir[:slash], "masks")
-
-    im = Image.open(filepath)
-    x = preprocessing.pilToTensor(im)
-
-    save_dir = config["test_save_dir"]
-    if not exists(save_dir):
-        makedirs(save_dir)
-
-    # y_image = Image.open(join(target_dir, filename)) #Ground-truth label
-    # y_pre = np.asarray(y_image, dtype="uint8")
-    # y = preprocessing.convert_labels(y_pre)
-    #
-
-    #
-    # # Visualize input image and ground-truth output
-    # io.imsave(f"{save_dir}/{filename}", x[:, :, 0])
-    # io.imsave(f"{save_dir}/y.{filenumber}.png", color.label2rgb(y, bg_label=0))
-
-    # Make inference pass
-    pretrained = config["use_saved_model"] #If we want to make a prediction using the whole trained model (trained by us), vs the random decoder head
-    probs = forward_pass(x, input_size, num_classes, crop_size, model_path=model_path, pretrained=pretrained)
-
-
-    # Convert whole probability map to color mask for each example in image
-    mask = preprocessing.prob_to_mask(probs[0])
-    io.imsave(f'{save_dir}/mask.{filenumber}.png', mask)
-
-    #TODO Implement quantitative evaluation with metrics
-    test_dir = "data/2018-DSB/semantic/test"
-    test_images_dir = path.join(test_dir, "images")
-    test_masks_dir = path.join(test_dir, "masks")
-
-    jaccard_sum = 0
-    image_count = 0 #Used later for computing average score
-
-    for i, file in enumerate(listdir(test_images_dir)):
-
-        if i % 10 == 0:
-            print(f"Processing test image {i} out of {len(listdir((test_images_dir)))}")
-
-        if not file.startswith('.'):
-
-            im = Image.open(path.join(test_images_dir, file))
-            x = preprocessing.pilToTensor(im)
-
-            mask = Image.open(path.join(test_masks_dir, file))
-            mask_arr = np.asarray(mask)
-            gt_labels = preprocessing.convert_labels(mask_arr, cell_value, background_value, draw_border)
-            gt_labels = gt_labels[crop_size: gt_labels.shape[0] - crop_size, crop_size: gt_labels.shape[1] - crop_size]
-
-
-            #Forward pass on that image
-            probs = forward_pass(x, input_size, num_classes, crop_size, model_path=model_path, pretrained=pretrained)
-
-            pred_labels = np.argmax(probs, axis=-1)[0]
-
-            jaccard_sum += jaccard_score(gt_labels.flatten(), pred_labels.flatten())
-            image_count += 1
-
-
-    print(f"Jaccard mean score: {jaccard_sum / image_count}")
-
+    visualize_prediction(config) #Given a filename in the config file, visualize mask predicted by network
+    compute_jaccard(config) #compute IoU metric over test directory
 
 
 def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=False, pretrained=False):
@@ -175,3 +88,85 @@ def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=F
         end_row = start_row + input_size
 
     return probs
+
+def visualize_prediction(config):
+    """
+    :param filepath: The path to the image that will be inputted to the network
+    :param config: config test file
+    """
+
+    filepath = config["test_filepath"]
+
+    # Parse image dir and filename
+    filename = filepath[filepath.rfind("/") + 1:]
+
+    input_size = config["input_size"]
+    crop_size = config["crop_border"]
+    experiment_path = config["test_save_dir"]
+    model_path = path.join(experiment_path, "unet.h5")
+    num_classes = config["num_classes"]
+    pretrained = config["use_saved_model"]  # If we want to make a prediction using the whole trained model (trained by us), vs the random decoder head
+
+    # Get list of input files and target mask
+    # Here we assume directory structue is name/masks/*.png and name/images/*.png
+    im = Image.open(filepath)
+    x = preprocessing.pilToTensor(im)
+
+    save_dir = config["test_save_dir"]
+    if not exists(save_dir):
+        makedirs(save_dir)
+
+    # Make inference pass
+    probs = forward_pass(x, input_size, num_classes, crop_size, model_path=model_path, pretrained=pretrained)
+
+    # Convert whole probability map to color mask for each example in image
+    mask = preprocessing.prob_to_mask(probs[0])
+    io.imsave(f'{save_dir}/mask.{filename}.png', mask)
+
+
+def compute_jaccard(config):
+
+    input_size = config["input_size"]
+    crop_size = config["crop_border"]
+    experiment_path = config["test_save_dir"]
+    model_path = path.join(experiment_path, "unet.h5")
+    num_classes = config["num_classes"]
+    pretrained = config["use_saved_model"]  # If we want to make a prediction using the whole trained model (trained by us), vs the random decoder head
+
+    background_value = config["background"]
+    cell_value = config["cell"]
+    draw_border = config["draw_border"]
+
+    test_dir = config["test_data_dir"]
+
+    test_images_dir = path.join(test_dir, "images")
+    test_masks_dir = path.join(test_dir, "masks")
+
+    jaccard_sum = 0
+    image_count = 0  # Used later for computing average score
+
+    for i, file in enumerate(listdir(test_images_dir)):
+
+        if i % 10 == 0:
+            print(f"Processing test image {i} out of {len(listdir((test_images_dir)))}")
+
+        if not file.startswith('.'):
+            im = Image.open(path.join(test_images_dir, file))
+            x = preprocessing.pilToTensor(im)
+
+            mask = Image.open(path.join(test_masks_dir, file))
+            mask_arr = np.asarray(mask)
+            gt_labels = preprocessing.convert_labels(mask_arr, cell_value, background_value, draw_border)
+            gt_labels = gt_labels[crop_size: gt_labels.shape[0] - crop_size, crop_size: gt_labels.shape[1] - crop_size]
+
+            # Forward pass on that image
+            probs = forward_pass(x, input_size, num_classes, crop_size, model_path=model_path, pretrained=pretrained)
+
+            pred_labels = np.argmax(probs, axis=-1)[0]
+
+            jaccard_sum += jaccard_score(gt_labels.flatten(), pred_labels.flatten())
+            image_count += 1
+
+    print(f"Jaccard mean score: {jaccard_sum / image_count}")
+
+

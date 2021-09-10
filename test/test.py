@@ -22,7 +22,7 @@ def test_unet(config):
     :return: nothing. Saves output prediction to an "images" directory.
     """
     visualize_prediction(config,
-                         num_images=1)  # Given a filename in the config file, visualize mask predicted by network
+                         num_images=5)  # Given a filename in the config file, visualize mask predicted by network
 
     compute_jaccard(config)  # compute IoU metric over test directory
 

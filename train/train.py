@@ -74,12 +74,12 @@ def train_unet(config):
     #We write this info to file in case debugging is needed later
     with open("train_paths.txt", "w") as file:
         for x_train_path in x_train_paths:
-            file.write(x_train_path)
+            file.write(x_train_path + "\n")
     file.close()
 
     with open("val_paths.txt", "w") as file:
         for x_val_path in x_val_paths:
-            file.write(x_val_path)
+            file.write(x_val_path + "\n")
     file.close()
 
 

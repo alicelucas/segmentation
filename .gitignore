@@ -14,3 +14,5 @@ test/__pycache__/
 .idea/
 experiments/
 losses/__pycache__/
+train_paths.txt
+val_paths.txt

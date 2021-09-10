@@ -76,7 +76,7 @@ def prob_to_mask(pred_mask, image = None):
   """
   From array of probabilities to a single image with most likely category having its own color
   :param pred_mask: output of the neural network, size (B, N, M, n) where n is number of classes
-  :param image: image to overlay labels on
+  :param image: image to overlay labels on (None if no image)
   :return: (N, M) image color-coded by class where prob is max
   """
   label = numpy.argmax(pred_mask, axis=-1)

@@ -21,7 +21,7 @@ def test_unet(config):
     :param config: configuration params
     :return: nothing. Saves output prediction to an "images" directory.
     """
-    visualize_prediction(config) #Given a filename in the config file, visualize mask predicted by network
+    visualize_prediction(config, num_images=10) #Given a filename in the config file, visualize mask predicted by network
     compute_jaccard(config) #compute IoU metric over test directory
 
 
@@ -89,17 +89,13 @@ def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=F
 
     return probs
 
-def visualize_prediction(config):
+def visualize_prediction(config, num_images = 1):
     """
-    :param filepath: The path to the image that will be inputted to the network
     :param config: config test file
+    :param num_images: number of images we want to save
     """
 
-    filepath = config["test_filepath"]
-
-    # Parse image dir and filename
-    filename = filepath[filepath.rfind("/") + 1:]
-
+    #FIXME many of the parameters below should be read from forward_pass
     input_size = config["input_size"]
     crop_size = config["crop_border"]
     experiment_path = config["test_save_dir"]
@@ -107,21 +103,37 @@ def visualize_prediction(config):
     num_classes = config["num_classes"]
     pretrained = config["use_saved_model"]  # If we want to make a prediction using the whole trained model (trained by us), vs the random decoder head
 
-    # Get list of input files and target mask
-    # Here we assume directory structue is name/masks/*.png and name/images/*.png
-    im = Image.open(filepath)
-    x = preprocessing.pilToTensor(im)
+    test_dir = config["test_data_dir"]
+
+    test_images_dir = path.join(test_dir, "images")
+    test_masks_dir = path.join(test_dir, "masks")
 
     save_dir = config["test_save_dir"]
-    if not exists(save_dir):
-        makedirs(save_dir)
+    predictions_dir = path.join(save_dir, "predictions") #where we will save images
 
-    # Make inference pass
-    probs = forward_pass(x, input_size, num_classes, crop_size, model_path=model_path, pretrained=pretrained)
+    listdir((test_images_dir))
 
-    # Convert whole probability map to color mask for each example in image
-    mask = preprocessing.prob_to_mask(probs[0])
-    io.imsave(f'{save_dir}/mask.{filename}.png', mask)
+    np.random.seed(0) #Let's sample the same images, everytime we test a new experiment
+    filenames = np.random.choice(listdir((test_images_dir))[1:], num_images) #Sample num_images from the images in test directry
+
+    for filename in filenames:
+        filepath = path.join(test_images_dir, filename)
+        # Get list of input files and target mask
+        # Here we assume directory structue is name/masks/*.png and name/images/*.png
+        im = Image.open(filepath)
+        x = preprocessing.pilToTensor(im)
+
+        if not exists(save_dir):
+            makedirs(save_dir)
+        if not exists(predictions_dir):
+            makedirs(path.join(save_dir, "predictions"))
+
+        # Make inference pass
+        probs = forward_pass(x, input_size, num_classes, crop_size, model_path=model_path, pretrained=pretrained)
+
+        # Convert whole probability map to color mask for each example in image
+        mask = preprocessing.prob_to_mask(probs[0], x[0, crop_size:x.shape[1] - crop_size, crop_size:x.shape[2] - crop_size])
+        io.imsave(f'{predictions_dir}/{filename[:-4]}.png', mask)
 
 
 def compute_jaccard(config):

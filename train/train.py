@@ -65,10 +65,26 @@ def train_unet(config):
 
     should_augment = config["augmentation"]
 
-    training_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[1]), numpy.take(target_paths, val_train_idx[1]),
-                                              batch_size, patch_size, crop_size, background_value, cell_value, draw_border, should_augment)
-    validation_generator = Cells.CellsGenerator(numpy.take(input_img_paths, val_train_idx[0]), numpy.take(target_paths, val_train_idx[0]),
-                                                8, patch_size, crop_size, background_value, cell_value, draw_border, should_augment=False)
+    #Distribute examples among training and validation dataset
+    x_train_paths = numpy.take(input_img_paths, val_train_idx[1])
+    y_train_paths = numpy.take(target_paths, val_train_idx[1])
+    x_val_paths = numpy.take(input_img_paths, val_train_idx[0])
+    y_val_paths = numpy.take(target_paths, val_train_idx[0])
+
+    #We write this info to file in case debugging is needed later
+    with open("train_paths.txt", "w") as file:
+        for x_train_path in x_train_paths:
+            file.write(x_train_path)
+    file.close()
+
+    with open("val_paths.txt", "w") as file:
+        for x_val_path in x_val_paths:
+            file.write(x_val_path)
+    file.close()
+
+
+    training_generator = Cells.CellsGenerator(x_train_paths, y_train_paths, batch_size, patch_size, crop_size, background_value, cell_value, draw_border, should_augment)
+    validation_generator = Cells.CellsGenerator(x_val_paths, y_val_paths, 8, patch_size, crop_size, background_value, cell_value, draw_border, should_augment=False)
 
     if optimizer_name == "Adam":
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)

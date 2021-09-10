@@ -13,4 +13,6 @@ cd ../../
 scp amlucas3@submit1.chtc.wisc.edu:/home/amlucas3/$1/loss.png ~/Documents/com/github/segmentation/experiments/${PROJECT}/${EXPERIMENT}
 scp amlucas3@submit1.chtc.wisc.edu:/home/amlucas3/$1/unet.h5 ~/Documents/com/github/segmentation/experiments/${PROJECT}/${EXPERIMENT}
 scp amlucas3@submit1.chtc.wisc.edu:/home/amlucas3/$1/commit.txt ~/Documents/com/github/segmentation/experiments/${PROJECT}/${EXPERIMENT} 
+scp amlucas3@submit1.chtc.wisc.edu:/home/amlucas3/$1/train_paths.txt ~/Documents/com/github/segmentation/experiments/${PROJECT}/${EXPERIMENT}
+scp amlucas3@submit1.chtc.wisc.edu:/home/amlucas3/$1/val_paths.txt ~/Documents/com/github/segmentation/experiments/${PROJECT}/${EXPERIMENT} 
 mv tmp/config.yaml ~/Documents/com/github/segmentation/experiments/${PROJECT}/${EXPERIMENT}/

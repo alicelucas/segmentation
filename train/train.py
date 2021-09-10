@@ -14,8 +14,6 @@ import math
 
 from losses.weighted_categorical_cross_entropy import weighted_categorical_crossentropy
 
-
-
 def train_unet(config):
     """
     :param config: config file

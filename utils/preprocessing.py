@@ -40,17 +40,20 @@ def convert_labels(data, cell_value, background_value, draw_border):
 
   y = numpy.zeros((data.shape[0], data.shape[1]), dtype="uint8") #Greyscale
 
-  if len(y.shape) == 3:
+  if len(data.shape) == 3:
     #Look at R, G, B channels in current mask
     red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
+    cell_pixels = (red == cell_value) & (green == cell_value) & (
+              blue == cell_value)  # Get pixel indices that have that color
 
-  elif len(y.shape) == 2:
+    background_pixels = (red == background_value) & (green == background_value) & (blue == background_value)
+
+  elif len(data.shape) == 2:
     #Greyscale case
-    red, green, blue = data[:, :], data[:, :], data[:, :]
+    cell_pixels = data == cell_value
+    background_pixels = data == background_value
 
   #Replace "inside cell labels with 2"
-  cell_label = cell_value, cell_value, cell_value #178, 178, 178 (or whatever was specified by the user)
-  cell_pixels = (red == cell_label[0]) & (green == cell_label[1]) & (blue == cell_label[2]) #Get pixel indices that have that color
   #pixels is a (image_size, image_size) array with True and False values
   if draw_border:
     y[cell_pixels] = 2
@@ -58,9 +61,6 @@ def convert_labels(data, cell_value, background_value, draw_border):
     y[cell_pixels] = 1
 
   #Replace background label with 0
-  background_label = background_value, background_value, background_value
-  background_pixels = (red == background_label[0]) & (green == background_label[1]) & (
-              blue == background_label[2])
   y[background_pixels] = 0
 
   if draw_border:

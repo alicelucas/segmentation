@@ -7,14 +7,17 @@ from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
 from utils import preprocessing
 
+from skimage import io, color
+
 
 class CellsGenerator(keras.utils.Sequence):
     """
     Helper class to iterate over the input (from file paths to numpy arrays)
     """
 
-    def __init__(self, x_paths, y_paths, batch_size, patch_size, crop_border, background_value, cell_value, draw_border, should_augment):
-        self.do_augment = should_augment
+    def __init__(self, x_paths, y_paths, batch_size, patch_size, crop_border, background_value, cell_value, draw_border, augment_count, should_augment):
+        self.should_augment = should_augment
+        self.augment_count = augment_count
 
         self.patch_size = patch_size
 
@@ -68,49 +71,59 @@ class CellsGenerator(keras.utils.Sequence):
 
             y = np.expand_dims(mask, 2)
 
-            if self.do_augment:
-                x, y = self.augment((x, y))  # Augment image
+            if self.should_augment:
+                count = 0  # The number of times we will augment the image
 
-            # number of column directions
-            n_row = x.shape[1] // self.patch_size
-            n_col = x.shape[0] // self.patch_size
+                while count < self.augment_count:
 
-            # Extract patches over image
-            for i in range(n_row):
-                for j in range(n_col):
+                    x, y = self.augment((x, y))  # Augment image
 
-                    # Extract y-patch
-                    patch = y[self.patch_size * i:self.patch_size * (i + 1),
-                            self.patch_size * j:self.patch_size * (j + 1), :]  # extract patch
+                    io.imsave(f"tmp/x_{idx}_{count}.png", x)
+                    io.imsave(f"tmp/y_{idx}_{count}.png", color.label2rgb(y[:, :, 0], bg_label=0))
 
-                    if patch.shape[0] < self.patch_size or patch.shape[1] < self.patch_size:
-                        continue #only go through this if we extracted a (patch size x patch size) patch
-
-                    cropped_patch = patch[self.crop_border: patch.shape[0] - self.crop_border,
-                                    self.crop_border: patch.shape[1] - self.crop_border, :]
+                    # number of column directions
+                    n_row = x.shape[1] // self.patch_size
+                    n_col = x.shape[0] // self.patch_size
 
 
-                    # Only keep the patch if it has non-zero labels (i.e., not just black)
-                    if 1 not in cropped_patch[:, :, 0]:
-                        continue
+                    # Extract patches over image
+                    for i in range(n_row):
+                        for j in range(n_col):
 
-                    # Convert y integer labels to one-hot labels
-                    label_binarizer = LabelBinarizer()
-                    label_binarizer.fit(range(np.amax(cropped_patch) + 1))
-                    one_hot_patch = np.reshape(label_binarizer.transform(cropped_patch[:, :, 0].flatten()),
-                                               [cropped_patch.shape[0], cropped_patch.shape[1], -1])
-                    #WARNING: if only two classes, this will stay as a sparse matrix and will not be one-hot encoded
-                    #(from sklearn's documentation)
-                    y_patches.append(one_hot_patch)
+                            # Extract y-patch
+                            patch = y[self.patch_size * i:self.patch_size * (i + 1),
+                                    self.patch_size * j:self.patch_size * (j + 1), :]  # extract patch
 
-                    # Extract x-patch
-                    patch = x[ self.patch_size * i:self.patch_size * (i + 1), self.patch_size * j:self.patch_size * (j + 1),
-                            :]  # extract center patch
-                    x_patches.append(patch)
+                            if patch.shape[0] < self.patch_size or patch.shape[1] < self.patch_size:
+                                continue #only go through this if we extracted a (patch size x patch size) patch
 
-                    # keep track of which patch belongs to which image
-                    self.x_paths.append(x_paths[idx])
-                    self.y_paths.append(y_paths[idx])
+                            cropped_patch = patch[self.crop_border: patch.shape[0] - self.crop_border,
+                                            self.crop_border: patch.shape[1] - self.crop_border, :]
+
+
+                            # Only keep the patch if it has non-zero labels (i.e., not just black)
+                            if 1 not in cropped_patch[:, :, 0]:
+                                continue
+
+                            # Convert y integer labels to one-hot labels
+                            label_binarizer = LabelBinarizer()
+                            label_binarizer.fit(range(np.amax(cropped_patch) + 1))
+                            one_hot_patch = np.reshape(label_binarizer.transform(cropped_patch[:, :, 0].flatten()),
+                                                       [cropped_patch.shape[0], cropped_patch.shape[1], -1])
+                            #WARNING: if only two classes, this will stay as a sparse matrix and will not be one-hot encoded
+                            #(from sklearn's documentation)
+                            y_patches.append(one_hot_patch)
+
+                            # Extract x-patch
+                            patch = x[ self.patch_size * i:self.patch_size * (i + 1), self.patch_size * j:self.patch_size * (j + 1),
+                                    :]  # extract center patch
+                            x_patches.append(patch)
+
+                            # keep track of which patch belongs to which image
+                            self.x_paths.append(x_paths[idx])
+                            self.y_paths.append(y_paths[idx])
+
+                            count += 1 #Increment augment count to keep track of number of augmented patches
 
         return x_patches, y_patches
 
@@ -130,11 +143,16 @@ class CellsGenerator(keras.utils.Sequence):
 
     def augment(self, x_and_y):
         """
-        Given a batch of images and their gt mask, augment it by flipping it (horizontally or vertically), and doing a rotation
+        Given a batch of images and their gt mask, augment it by flipping it (horizontally or vertically),  doing a rotation,
+        and scaling it
         :return: the augmented batch of data
         """
-        x_and_y = preprocessing.flip(x_and_y)
-        return preprocessing.rotate(x_and_y)
+
+        flipped = preprocessing.flip(x_and_y)
+        scaled = preprocessing.scale(flipped)
+        rotated = preprocessing.rotate(scaled)
+
+        return rotated
 
     def __getitem__(self, batch_idx):
         """Return (input, target) numpy array corresponding to batch idx"""

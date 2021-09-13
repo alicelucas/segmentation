@@ -1,5 +1,5 @@
 import numpy
-from skimage import color
+from skimage import color, transform
 from scipy import ndimage
 import random
 import numpy as np
@@ -17,6 +17,20 @@ def rotate(x_and_y):
 
   return ndimage.rotate(x, angle, reshape=False, output=output_x), ndimage.rotate(y, angle, reshape=False, output=output_y)
 
+def scale(x_and_y):
+  """
+  Given (x, y) tuple, scale_in image
+  :param x_and_y:
+  :return: the scaled x and y
+  """
+  x = x_and_y[0]
+  y = x_and_y[1]
+  #Scale between 0.5 and 2
+  scale = random.uniform(1, 2)
+  x_scaled = transform.rescale(x, scale, anti_aliasing=True, multichannel=True)
+  y_scaled = transform.rescale(y[:, :, 0], scale, preserve_range=True, anti_aliasing=False, order=0)
+  y_scaled = y_scaled[:, :, np.newaxis].astype(np.uint8)
+  return x_scaled, y_scaled
 
 def flip(x_and_y):
   """

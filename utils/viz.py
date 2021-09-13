@@ -10,7 +10,7 @@ def datasize_vs_iou():
     #used by doing XX * 670 (for DSB), where XX is the percentage.
     #You can read the y values from the jaccard.txt files.
     x = [16, 33, 67, 167, 335, 502, 670] #number of images
-    y = [0.43, 0.47, 0.66, 0.71, 0.64, 0.72, 0.73] #the mean IoU score
+    y = [0.43, 0.47, 0.66, 0.71, 0.71, 0.72, 0.73] #the mean IoU score
 
     fig, ax = plt.subplots()
     ax.scatter(x, y)

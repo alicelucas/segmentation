@@ -21,10 +21,15 @@ def test_unet(config):
     :param config: configuration params
     :return: nothing. Saves output prediction to an "images" directory.
     """
-    visualize_prediction(config,
+
+    project = config["project"]
+    experiment_name = config["experiment_name"]
+    experiment_path = path.join("experiments", project, experiment_name)
+
+    visualize_prediction(config, experiment_path,
                          num_images=5)  # Given a filename in the config file, visualize mask predicted by network
 
-    compute_jaccard(config)  # compute IoU metric over test directory
+    compute_jaccard(config, experiment_path)  # compute IoU metric over test directory
 
 
 def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=False, pretrained=False):
@@ -102,7 +107,7 @@ def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=F
     return probs
 
 
-def visualize_prediction(config, num_images=1):
+def visualize_prediction(config, experiment_path, num_images=1):
     """
     :param config: config test file
     :param num_images: number of images we want to save
@@ -110,8 +115,7 @@ def visualize_prediction(config, num_images=1):
 
     input_size = config["input_size"]
     crop_size = config["crop_border"]
-    experiment_path = config["test_save_dir"]
-    model_path = path.join(experiment_path, "unet.h5")
+
     num_classes = config["num_classes"]
     pretrained = config[
         "use_saved_model"]  # If we want to make a prediction using the whole trained model (trained by us), vs the random decoder head
@@ -120,8 +124,7 @@ def visualize_prediction(config, num_images=1):
 
     test_images_dir = path.join(test_dir, "images")
 
-    save_dir = config["test_save_dir"]
-    predictions_dir = path.join(save_dir, "predictions")  # where we will save images
+    predictions_dir = path.join(experiment_path, "predictions")  # where we will save images
 
     listdir((test_images_dir))
 
@@ -129,15 +132,17 @@ def visualize_prediction(config, num_images=1):
     filenames = np.random.choice(listdir((test_images_dir))[1:],
                                  num_images)  # Sample num_images from the images in test directry
 
+    model_path = path.join(experiment_path, "unet.h5")
+
     for filename in filenames:
         filepath = path.join(test_images_dir, filename)
         im = Image.open(filepath)
         x = preprocessing.pilToTensor(im)
 
-        if not exists(save_dir):
-            makedirs(save_dir)
+        if not exists(experiment_path):
+            makedirs(experiment_path)
         if not exists(predictions_dir):
-            makedirs(path.join(save_dir, "predictions"))
+            makedirs(path.join(experiment_path, "predictions"))
 
         # Make inference pass
         probs = forward_pass(x, input_size, num_classes, crop_size, model_path=model_path, pretrained=pretrained)
@@ -148,7 +153,7 @@ def visualize_prediction(config, num_images=1):
         io.imsave(f'{predictions_dir}/{filename[:-4]}.png', mask)
 
 
-def compute_jaccard(config):
+def compute_jaccard(config, experiment_path):
     """
     Iterate over test dataset and compute mean IOU
     :param config:
@@ -157,7 +162,7 @@ def compute_jaccard(config):
 
     input_size = config["input_size"]
     crop_size = config["crop_border"]
-    experiment_path = config["test_save_dir"]
+
     model_path = path.join(experiment_path, "unet.h5")
     num_classes = config["num_classes"]
     pretrained = config[

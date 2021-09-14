@@ -83,7 +83,7 @@ def train_unet(config):
 
 
     training_generator = Cells.CellsGenerator(x_train_paths, y_train_paths, batch_size, patch_size, crop_size, background_value, cell_value, draw_border, augment_count, should_augment)
-    validation_generator = Cells.CellsGenerator(x_val_paths, y_val_paths, 8, patch_size, crop_size, background_value, cell_value, draw_border, augment_count, should_augment=False)
+    validation_generator = Cells.CellsGenerator(x_val_paths, y_val_paths, 8, patch_size, crop_size, background_value, cell_value, draw_border, augment_count=1, should_augment=False)
 
     if optimizer_name == "Adam":
         optimizer = tf.keras.optimizers.Adam(lr=base_learning_rate)

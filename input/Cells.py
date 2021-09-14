@@ -63,20 +63,20 @@ class CellsGenerator(keras.utils.Sequence):
                 print(f"Loading and patching file #{idx} in {len(x_paths)} files")
 
             baz = load_img(x_path, color_mode="rgb")
-            x = np.array(img_to_array(baz), dtype="float32")
+            x_ori = np.array(img_to_array(baz), dtype="float32")
 
             foo = load_img(y_paths[idx], color_mode="rgb")
             data = np.array([img_to_array(foo)], dtype="uint8")
             mask = preprocessing.convert_labels(data[0], self.cell_value, self.background_value, self.draw_border)
 
-            y = np.expand_dims(mask, 2)
+            y_ori = np.expand_dims(mask, 2)
 
             if self.should_augment:
                 count = 0  # The number of times we will augment the image
 
                 while count < self.augment_count:
 
-                    x, y = self.augment((x, y))  # Augment image
+                    x, y = self.augment((x_ori, y_ori))  # Augment image
 
                     io.imsave(f"tmp/x_{idx}_{count}.png", x)
                     io.imsave(f"tmp/y_{idx}_{count}.png", color.label2rgb(y[:, :, 0], bg_label=0))

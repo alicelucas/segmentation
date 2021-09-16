@@ -71,7 +71,6 @@ class CellsGenerator(keras.utils.Sequence):
 
             y_ori = np.expand_dims(mask, 2)
 
-
             count = 0  # The number of times we will augment the image
 
             while count < self.augment_count:
@@ -103,6 +102,8 @@ class CellsGenerator(keras.utils.Sequence):
                         # Only keep the patch if it has non-zero labels (i.e., not just black)
                         if 1 not in cropped_patch[:, :, 0]:
                             continue
+                        if self.draw_border and 2 not in cropped_patch[:, :, 0]:
+                            continue
 
                         # Convert y integer labels to one-hot labels
                         label_binarizer = LabelBinarizer()
@@ -122,7 +123,7 @@ class CellsGenerator(keras.utils.Sequence):
                         self.x_paths.append(x_paths[idx])
                         self.y_paths.append(y_paths[idx])
 
-                        count += 1 #Increment augment count to keep track of number of augmented patches
+                count += 1 #Increment augment count to keep track of number of augmented patches
 
         return x_patches, y_patches
 

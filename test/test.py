@@ -177,8 +177,10 @@ def compute_jaccard(config, experiment_path):
     test_images_dir = path.join(test_dir, "images")
     test_masks_dir = path.join(test_dir, "masks")
 
-    jaccard_sum = 0
     image_count = 0  # Used later for computing average score
+
+    jaccard_sums = [0 for i in range(num_classes)]
+    print(jaccard_sums)
 
     for i, file in enumerate(listdir(test_images_dir)):
 
@@ -199,11 +201,16 @@ def compute_jaccard(config, experiment_path):
 
             pred_labels = np.argmax(probs, axis=-1)[0]
 
-            jaccard_sum += jaccard_score(gt_labels.flatten(), pred_labels.flatten())
+            scores = jaccard_score(gt_labels.flatten(), pred_labels.flatten(),  average=None)
+
+            for j, score in enumerate(scores):
+                jaccard_sums[j] += score
+
             image_count += 1
 
-    jaccard_mean = jaccard_sum / image_count
-    print(f"Jaccard mean score: {jaccard_mean}")
+    jaccard_means = [ jaccard_sum / image_count for jaccard_sum in jaccard_sums]
+    print(f"Jaccard mean scores: {jaccard_means}")
 
     with open(path.join(experiment_path, "jaccard.txt"), "w") as file:
-        file.write("Jaccard score: {:.2f}".format(jaccard_mean))
+        for j, score in enumerate(jaccard_means):
+            file.write(f'Jaccard score for class {j}: {score:.2f} \n')

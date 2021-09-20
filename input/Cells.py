@@ -117,7 +117,12 @@ class CellsGenerator(keras.utils.Sequence):
                         # Extract x-patch
                         patch = x[ self.patch_size * i:self.patch_size * (i + 1), self.patch_size * j:self.patch_size * (j + 1),
                                 :]  # extract center patch
-                        x_patches.append(patch)
+
+                        #Normalize [-1, 1] in accordance with MobileNet's preprocessing
+                        normalized = np.true_divide(patch, 127.5)
+                        normalized = np.subtract(normalized, 1)
+
+                        x_patches.append(normalized)
 
                         # keep track of which patch belongs to which image
                         self.x_paths.append(x_paths[idx])

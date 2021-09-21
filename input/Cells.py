@@ -119,7 +119,7 @@ class CellsGenerator(keras.utils.Sequence):
                                 :]  # extract center patch
 
                         #Normalize [-1, 1] in accordance with MobileNet's preprocessing
-                        normalized = np.true_divide(patch, 127.5, out=np.zeros_like(patch), where=patch!=0)
+                        normalized = np.true_divide(patch, 127.5)
                         normalized = np.subtract(normalized, 1)
 
                         x_patches.append(normalized)

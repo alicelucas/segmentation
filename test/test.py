@@ -35,13 +35,17 @@ def test_unet(config):
 def forward_pass(x, input_size, num_classes, crop_size, model_path="", dropout=False, pretrained=False):
     """
     Given input, forward pass through model. If needed, patch up image.
-    :param input: (B, N, M, C) input (full image)
+    :param input: (B, N, M, C) input
     :param input_size: the input size of the patch that goes to neural net
     :param pad_size: the pad size used to pad the input to avoid border effects
     :param num_classes
     :param pretrained: if False, then we use the random head decoder. If true, we use the unet.h5 weights that have been saved to home
     :return: The probability map of the size of the input image
     """
+
+    #normalize x such that in range [-1, 1]
+    #Previously this was done as a layer in the architecture
+    x = np.subtract(np.true_divide(x, 127.5), 1)
 
     # Initialize model
     if pretrained:
